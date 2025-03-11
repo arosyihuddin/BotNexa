@@ -1,4 +1,3 @@
-
 import { ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
@@ -28,7 +27,7 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <SidebarProvider>
           <div className="flex min-h-screen">
             {/* Sidebar */}
@@ -51,48 +50,55 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
               </SidebarHeader>
               
               <SidebarContent className="px-2 py-2">
-                <nav className="space-y-1">
+                <nav className="flex flex-col space-y-2">
                   <NavItem 
                     icon={<Home />} 
                     label="Dashboard" 
                     active={location.pathname === '/dashboard'} 
                     to="/dashboard" 
+                    className="p-2 hover:bg-gray-100"
                   />
                   <NavItem 
                     icon={<MessageSquare />} 
                     label="Conversations" 
                     active={location.pathname === '/conversations'} 
                     to="/conversations" 
+                    className="p-2 hover:bg-gray-100"
                   />
                   <NavItem 
                     icon={<BrainCircuit />} 
                     label="AI Settings" 
                     active={location.pathname === '/ai-settings'} 
                     to="/ai-settings" 
+                    className="p-2 hover:bg-gray-100"
                   />
                   <NavItem 
                     icon={<Calendar />} 
                     label="Reminders" 
                     active={location.pathname === '/reminders'} 
                     to="/reminders" 
+                    className="p-2 hover:bg-gray-100"
                   />
                   <NavItem 
                     icon={<Users />} 
                     label="Contacts" 
                     active={location.pathname === '/contacts'} 
                     to="/contacts" 
+                    className="p-2 hover:bg-gray-100"
                   />
                   <NavItem 
                     icon={<BarChart3 />} 
                     label="Analytics" 
                     active={location.pathname === '/analytics'} 
                     to="/analytics" 
+                    className="p-2 hover:bg-gray-100"
                   />
                   <NavItem 
                     icon={<Settings />} 
                     label="Settings" 
                     active={location.pathname === '/settings'} 
                     to="/settings" 
+                    className="p-2 hover:bg-gray-100"
                   />
                 </nav>
               </SidebarContent>
@@ -152,7 +158,7 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
               </header>
               
               {/* Content */}
-              <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
+              <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6 w-full">
                 {children}
               </main>
             </div>
@@ -168,7 +174,11 @@ interface NavItemProps {
   label: string;
   active?: boolean;
   to: string;
+  className?: string; // Added className to allow passing custom styles
 }
+
+
+
 
 const NavItem = ({ icon, label, active, to }: NavItemProps) => {
   const navigate = useNavigate();
