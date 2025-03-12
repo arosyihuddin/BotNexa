@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -30,12 +31,20 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   }, [location]);
 
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4",
         isScrolled
-          ? "bg-white/80 backdrop-blur-md shadow-sm"
+          ? "bg-background/80 backdrop-blur-md shadow-sm border-b border-border"
           : "bg-transparent"
       )}
     >
@@ -53,16 +62,17 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
-            <NavLink to="/" active={isActive("/")}>
+            <NavLink to="/" active={isActive("/")} onClick={() => {}}>
               Home
             </NavLink>
-            <NavLink to="#features" active={isActive("/features")}>
+            <NavLink to="/#features" active={false} onClick={() => scrollToSection('features')}>
               Features
             </NavLink>
-            <NavLink to="/pricing" active={isActive("/pricing")}>
+            <NavLink to="/#pricing" active={false} onClick={() => scrollToSection('pricing')}>
               Pricing
             </NavLink>
             <div className="ml-4 flex items-center gap-3">
+              <ThemeToggle />
               <Button asChild variant="ghost" className="font-medium">
                 <Link to="/login">Login</Link>
               </Button>
@@ -73,19 +83,21 @@ const Navbar = () => {
           </nav>
 
           {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </Button>
+          <div className="flex items-center gap-2 md:hidden">
+            <ThemeToggle />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -96,14 +108,14 @@ const Navbar = () => {
           isMobileMenuOpen ? "translate-y-0" : "-translate-y-full"
         )}
       >
-        <div className="bg-white/95 backdrop-blur-md shadow-md py-4 px-6 flex flex-col gap-3">
-          <MobileNavLink to="/" active={isActive("/")}>
+        <div className="bg-background/95 dark:bg-card/95 backdrop-blur-md shadow-md py-4 px-6 flex flex-col gap-3 border-b border-border">
+          <MobileNavLink to="/" active={isActive("/")} onClick={() => {}}>
             Home
           </MobileNavLink>
-          <MobileNavLink to="/features" active={isActive("/features")}>
+          <MobileNavLink to="/#features" active={false} onClick={() => scrollToSection('features')}>
             Features
           </MobileNavLink>
-          <MobileNavLink to="/pricing" active={isActive("/pricing")}>
+          <MobileNavLink to="/#pricing" active={false} onClick={() => scrollToSection('pricing')}>
             Pricing
           </MobileNavLink>
           <div className="grid grid-cols-2 gap-3 mt-3">
@@ -124,37 +136,81 @@ interface NavLinkProps {
   to: string;
   active: boolean;
   children: React.ReactNode;
+  onClick: () => void;
 }
 
-const NavLink = ({ to, active, children }: NavLinkProps) => (
-  <Link
-    to={to}
-    className={cn(
-      "px-3 py-2 rounded-full text-sm font-medium transition-colors relative",
-      active
-        ? "text-botnexa-600"
-        : "text-foreground/80 hover:text-foreground hover:bg-secondary/80"
-    )}
-  >
-    {children}
-    {active && (
-      <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-botnexa-500 rounded-full" />
-    )}
-  </Link>
-);
+const NavLink = ({ to, active, children, onClick }: NavLinkProps) => {
+  const isHash = to.includes('#');
+  
+  if (isHash) {
+    return (
+      <button
+        onClick={onClick}
+        className={cn(
+          "px-3 py-2 rounded-full text-sm font-medium transition-colors relative",
+          active
+            ? "text-botnexa-600 dark:text-botnexa-400"
+            : "text-foreground/80 hover:text-foreground hover:bg-secondary/80"
+        )}
+      >
+        {children}
+        {active && (
+          <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-botnexa-500 rounded-full" />
+        )}
+      </button>
+    );
+  }
+  
+  return (
+    <Link
+      to={to}
+      className={cn(
+        "px-3 py-2 rounded-full text-sm font-medium transition-colors relative",
+        active
+          ? "text-botnexa-600 dark:text-botnexa-400"
+          : "text-foreground/80 hover:text-foreground hover:bg-secondary/80"
+      )}
+    >
+      {children}
+      {active && (
+        <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-botnexa-500 rounded-full" />
+      )}
+    </Link>
+  );
+};
 
-const MobileNavLink = ({ to, active, children }: NavLinkProps) => (
-  <Link
-    to={to}
-    className={cn(
-      "py-2 px-3 rounded-md text-base font-medium transition-colors",
-      active
-        ? "bg-secondary text-botnexa-600"
-        : "text-foreground/80 hover:bg-secondary/50 hover:text-foreground"
-    )}
-  >
-    {children}
-  </Link>
-);
+const MobileNavLink = ({ to, active, children, onClick }: NavLinkProps) => {
+  const isHash = to.includes('#');
+  
+  if (isHash) {
+    return (
+      <button
+        onClick={onClick}
+        className={cn(
+          "py-2 px-3 rounded-md text-base font-medium transition-colors",
+          active
+            ? "bg-secondary text-botnexa-600 dark:text-botnexa-400"
+            : "text-foreground/80 hover:bg-secondary/50 hover:text-foreground"
+        )}
+      >
+        {children}
+      </button>
+    );
+  }
+  
+  return (
+    <Link
+      to={to}
+      className={cn(
+        "py-2 px-3 rounded-md text-base font-medium transition-colors",
+        active
+          ? "bg-secondary text-botnexa-600 dark:text-botnexa-400"
+          : "text-foreground/80 hover:bg-secondary/50 hover:text-foreground"
+      )}
+    >
+      {children}
+    </Link>
+  );
+};
 
 export default Navbar;

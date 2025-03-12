@@ -35,7 +35,7 @@ const Login = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen flex flex-col bg-gradient-to-b from-botnexa-50/50 to-background">
+      <div className="min-h-screen flex flex-col bg-gradient-to-b from-botnexa-50/50 to-background dark:from-botnexa-900/10 dark:to-background">
         <header className="py-4 px-6">
           <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -52,11 +52,11 @@ const Login = () => {
                 </div>
                 <span className="font-bold text-xl">BotNexa</span>
               </Link>
-              <h1 className="text-2xl font-bold">Welcome back</h1>
+              <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
               <p className="text-muted-foreground mt-2">Sign in to your account</p>
             </div>
             
-            <Card className="p-6 bg-white/70 backdrop-blur-sm border-border/50 animate-scale-in">
+            <Card className="p-6 bg-white/70 dark:bg-card/50 backdrop-blur-sm border-border/50 animate-scale-in">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
@@ -68,7 +68,7 @@ const Login = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     autoComplete="email"
-                    className="bg-white"
+                    className="bg-white dark:bg-card"
                   />
                 </div>
                 
@@ -77,7 +77,7 @@ const Login = () => {
                     <Label htmlFor="password">Password</Label>
                     <Link 
                       to="/forgot-password"
-                      className="text-sm text-botnexa-600 hover:text-botnexa-700 transition-colors"
+                      className="text-sm text-botnexa-600 dark:text-botnexa-400 hover:text-botnexa-700 dark:hover:text-botnexa-300 transition-colors"
                     >
                       Forgot password?
                     </Link>
@@ -91,7 +91,7 @@ const Login = () => {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       autoComplete="current-password"
-                      className="pr-10 bg-white"
+                      className="pr-10 bg-white dark:bg-card"
                     />
                     <button
                       type="button"
@@ -130,7 +130,7 @@ const Login = () => {
                 <span className="text-muted-foreground">Don't have an account?</span>{" "}
                 <Link
                   to="/register"
-                  className="text-botnexa-600 hover:text-botnexa-700 font-medium transition-colors"
+                  className="text-botnexa-600 dark:text-botnexa-400 hover:text-botnexa-700 dark:hover:text-botnexa-300 font-medium transition-colors"
                 >
                   Sign up
                 </Link>

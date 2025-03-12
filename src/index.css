@@ -47,6 +47,45 @@
     --sidebar-ring: 222 84% 48%;
   }
 
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 42% 15%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 217 32% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 32% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 212.7 26.8% 83.9%;
+
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 210 40% 98%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 217 32% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 32% 17%;
+    --sidebar-ring: 212.7 26.8% 83.9%;
+  }
+
   * {
     @apply border-border;
     -webkit-font-smoothing: antialiased;
@@ -80,7 +119,7 @@
 
 @layer components {
   .glass-card {
-    @apply bg-white/80 backdrop-blur-lg border border-white/20 shadow-sm;
+    @apply bg-card/80 backdrop-blur-lg border border-border shadow-sm;
   }
   
   .card-hover {
@@ -128,6 +167,55 @@
   .subtle-underline {
     @apply relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left;
   }
+
+  /* Responsive utility classes */
+  .responsive-container {
+    @apply w-full px-4 sm:px-6 md:px-8 mx-auto max-w-7xl;
+  }
+
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6;
+  }
+
+  .responsive-flex {
+    @apply flex flex-col sm:flex-row items-stretch sm:items-center;
+  }
+  
+  /* Dark mode specific components */
+  .dark .pricing-card {
+    @apply bg-card/90 border-border;
+  }
+  
+  .dark .feature-card {
+    @apply bg-card/90 border-border text-foreground;
+  }
+  
+  .dark .feature-icon {
+    @apply bg-accent text-accent-foreground;
+  }
+
+  /* Sidebar dark mode styles */
+  .dark .sidebar-item {
+    @apply hover:bg-accent text-foreground;
+  }
+
+  .dark .sidebar-item-active {
+    @apply bg-accent text-accent-foreground;
+  }
+
+  /* Settings tab dark mode styles */
+  .dark .settings-tab {
+    @apply hover:bg-accent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground;
+  }
+
+  /* Personality component dark mode styles */
+  .dark .personality-option {
+    @apply bg-card border-border hover:bg-accent text-foreground;
+  }
+
+  .dark .personality-option-selected {
+    @apply bg-accent border-accent text-accent-foreground;
+  }
 }
 
 @layer utilities {
@@ -149,5 +237,14 @@
   
   .backface-hidden {
     backface-visibility: hidden;
+  }
+
+  /* Media query utility classes */
+  .mobile-only {
+    @apply block sm:hidden;
+  }
+
+  .desktop-only {
+    @apply hidden sm:block;
   }
 }

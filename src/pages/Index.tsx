@@ -37,10 +37,10 @@ const Index = () => {
         <Features />
         
         {/* Pricing Section */}
-        <section className="py-16 md:py-24 bg-botnexa-50">
+        <section id="pricing" className="py-16 md:py-24 bg-botnexa-50 dark:bg-background">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center max-w-3xl mx-auto mb-16">
-              <h2 className="heading-lg mb-4">
+              <h2 className="heading-lg mb-4 dark:text-white">
                 Simple, Transparent Pricing
               </h2>
               <p className="text-lg text-muted-foreground">
@@ -50,10 +50,11 @@ const Index = () => {
             
             <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               {/* Basic Plan */}
-              <div className="bg-white rounded-xl shadow-sm border border-border p-6 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
+              <div className="bg-white dark:bg-card rounded-xl shadow-sm border border-border p-6 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
                 <div className="text-center mb-6">
-                  <h3 className="text-xl font-semibold mb-2">Basic</h3>
-                  <div className="text-3xl font-bold mb-2">$9<span className="text-lg font-normal text-muted-foreground">/mo</span></div>
+                  <h3 className="text-xl font-semibold mb-2 dark:text-white">Basic</h3>
+                  <div className="text-3xl font-bold mb-2 dark:text-white">$9<span className="text-lg font-normal text-muted-foreground">
+                    /mo</span></div>
                   <p className="text-muted-foreground">For personal use</p>
                 </div>
                 
@@ -70,14 +71,14 @@ const Index = () => {
               </div>
               
               {/* Pro Plan - Highlighted */}
-              <div className="bg-white rounded-xl shadow-lg border border-botnexa-200 p-6 transform scale-105 relative">
+              <div className="bg-white dark:bg-card rounded-xl shadow-lg border border-botnexa-200 dark:border-botnexa-700 p-6 transform scale-105 relative">
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-botnexa-500 text-white px-4 py-1 rounded-full text-sm font-medium">
                   Most Popular
                 </div>
                 
                 <div className="text-center mb-6">
-                  <h3 className="text-xl font-semibold mb-2">Professional</h3>
-                  <div className="text-3xl font-bold mb-2">$29<span className="text-lg font-normal text-muted-foreground">/mo</span></div>
+                  <h3 className="text-xl font-semibold mb-2 dark:text-white">Professional</h3>
+                  <div className="text-3xl font-bold mb-2 dark:text-white">$29<span className="text-lg font-normal text-muted-foreground">/mo</span></div>
                   <p className="text-muted-foreground">For growing businesses</p>
                 </div>
                 
@@ -95,10 +96,10 @@ const Index = () => {
               </div>
               
               {/* Enterprise Plan */}
-              <div className="bg-white rounded-xl shadow-sm border border-border p-6 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
+              <div className="bg-white dark:bg-card rounded-xl shadow-sm border border-border p-6 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
                 <div className="text-center mb-6">
-                  <h3 className="text-xl font-semibold mb-2">Enterprise</h3>
-                  <div className="text-3xl font-bold mb-2">$99<span className="text-lg font-normal text-muted-foreground">/mo</span></div>
+                  <h3 className="text-xl font-semibold mb-2 dark:text-white">Enterprise</h3>
+                  <div className="text-3xl font-bold mb-2 dark:text-white">$99<span className="text-lg font-normal text-muted-foreground">/mo</span></div>
                   <p className="text-muted-foreground">For large organizations</p>
                 </div>
                 
@@ -120,10 +121,10 @@ const Index = () => {
         </section>
         
         {/* CTA Section */}
-        <section className="py-16 md:py-24 bg-white cta-section">
+        <section className="py-16 md:py-24 bg-white dark:bg-card cta-section">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="heading-lg mb-6">Ready to Transform Your WhatsApp Experience?</h2>
+              <h2 className="heading-lg mb-6 dark:text-white">Ready to Transform Your WhatsApp Experience?</h2>
               <p className="text-lg text-muted-foreground mb-8">
                 Join thousands of users who are already using BotNexa to manage their WhatsApp bots with ease.
               </p>
@@ -192,7 +193,7 @@ const Index = () => {
 const PricingFeature = ({ children }: { children: React.ReactNode }) => (
   <li className="flex items-start gap-2">
     <Check className="h-5 w-5 text-botnexa-500 flex-shrink-0 mt-0.5" />
-    <span>{children}</span>
+    <span className="dark:text-white">{children}</span>
   </li>
 );
 

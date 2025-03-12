@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Settings as SettingsIcon, 
@@ -24,9 +23,19 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import DashboardLayout from "@/components/DashboardLayout";
+import { toast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("profile");
+  
+  const handleSaveChanges = () => {
+    toast({
+      title: "Success",
+      description: "Your changes have been saved successfully.",
+      variant: "default",
+    });
+  };
   
   return (
     <DashboardLayout title="Settings">
@@ -40,23 +49,53 @@ const Settings = () => {
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="flex flex-wrap">
-            <TabsTrigger value="profile" className="data-[state=active]:bg-botnexa-50 data-[state=active]:text-botnexa-700">
+            <TabsTrigger 
+              value="profile" 
+              className={cn(
+                "data-[state=active]:bg-botnexa-50 data-[state=active]:text-botnexa-700", 
+                "dark:data-[state=active]:bg-botnexa-950/20 dark:data-[state=active]:text-botnexa-300"
+              )}
+            >
               <User className="h-4 w-4 mr-2" />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="account" className="data-[state=active]:bg-botnexa-50 data-[state=active]:text-botnexa-700">
+            <TabsTrigger 
+              value="account" 
+              className={cn(
+                "data-[state=active]:bg-botnexa-50 data-[state=active]:text-botnexa-700", 
+                "dark:data-[state=active]:bg-botnexa-950/20 dark:data-[state=active]:text-botnexa-300"
+              )}
+            >
               <SettingsIcon className="h-4 w-4 mr-2" />
               Account
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="data-[state=active]:bg-botnexa-50 data-[state=active]:text-botnexa-700">
+            <TabsTrigger 
+              value="notifications" 
+              className={cn(
+                "data-[state=active]:bg-botnexa-50 data-[state=active]:text-botnexa-700", 
+                "dark:data-[state=active]:bg-botnexa-950/20 dark:data-[state=active]:text-botnexa-300"
+              )}
+            >
               <Bell className="h-4 w-4 mr-2" />
               Notifications
             </TabsTrigger>
-            <TabsTrigger value="security" className="data-[state=active]:bg-botnexa-50 data-[state=active]:text-botnexa-700">
+            <TabsTrigger 
+              value="security" 
+              className={cn(
+                "data-[state=active]:bg-botnexa-50 data-[state=active]:text-botnexa-700", 
+                "dark:data-[state=active]:bg-botnexa-950/20 dark:data-[state=active]:text-botnexa-300"
+              )}
+            >
               <Shield className="h-4 w-4 mr-2" />
               Security
             </TabsTrigger>
-            <TabsTrigger value="billing" className="data-[state=active]:bg-botnexa-50 data-[state=active]:text-botnexa-700">
+            <TabsTrigger 
+              value="billing" 
+              className={cn(
+                "data-[state=active]:bg-botnexa-50 data-[state=active]:text-botnexa-700", 
+                "dark:data-[state=active]:bg-botnexa-950/20 dark:data-[state=active]:text-botnexa-300"
+              )}
+            >
               <CreditCard className="h-4 w-4 mr-2" />
               Billing
             </TabsTrigger>
@@ -118,7 +157,10 @@ const Settings = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">
-                <Button className="bg-botnexa-500 hover:bg-botnexa-600">
+                <Button 
+                  className="bg-botnexa-500 hover:bg-botnexa-600"
+                  onClick={handleSaveChanges}
+                >
                   Save Changes
                 </Button>
               </CardFooter>
@@ -137,16 +179,12 @@ const Settings = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="language">Language</Label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <Button variant="outline" className="justify-start border-botnexa-200 bg-botnexa-50">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" className="justify-start border-botnexa-200 bg-botnexa-50 dark:bg-botnexa-950/20 dark:border-botnexa-900">
                       <Check className="mr-2 h-4 w-4" />
                       English
                     </Button>
-                    <Button variant="outline" className="justify-start">Spanish</Button>
-                    <Button variant="outline" className="justify-start">French</Button>
-                    <Button variant="outline" className="justify-start">German</Button>
-                    <Button variant="outline" className="justify-start">Japanese</Button>
-                    <Button variant="outline" className="justify-start">Chinese</Button>
+                    <Button variant="outline" className="justify-start">Bahasa Indonesia</Button>
                   </div>
                 </div>
                 
@@ -154,7 +192,7 @@ const Settings = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="timezone">Timezone</Label>
-                  <Input id="timezone" value="(UTC-05:00) Eastern Time (US & Canada)" readOnly />
+                  <Input id="timezone" value="(UTC+07:00) Jakarta" readOnly />
                   <p className="text-xs text-muted-foreground">
                     Your timezone is detected automatically based on your current location.
                   </p>
@@ -191,7 +229,10 @@ const Settings = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">
-                <Button className="bg-botnexa-500 hover:bg-botnexa-600">
+                <Button 
+                  className="bg-botnexa-500 hover:bg-botnexa-600"
+                  onClick={handleSaveChanges}
+                >
                   Save Preferences
                 </Button>
               </CardFooter>

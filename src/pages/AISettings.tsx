@@ -28,10 +28,10 @@ const AISettings = () => {
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid grid-cols-2 md:grid-cols-4 md:w-fit">
-            <TabsTrigger value="personality">Personality</TabsTrigger>
-            <TabsTrigger value="knowledge">Knowledge Base</TabsTrigger>
-            <TabsTrigger value="behavior">Behavior</TabsTrigger>
-            <TabsTrigger value="advanced">Advanced</TabsTrigger>
+            <TabsTrigger value="personality" className="data-[state=active]:bg-botnexa-500 data-[state=active]:text-white dark:data-[state=active]:bg-botnexa-600">Personality</TabsTrigger>
+            <TabsTrigger value="knowledge" className="data-[state=active]:bg-botnexa-500 data-[state=active]:text-white dark:data-[state=active]:bg-botnexa-600">Knowledge Base</TabsTrigger>
+            <TabsTrigger value="behavior" className="data-[state=active]:bg-botnexa-500 data-[state=active]:text-white dark:data-[state=active]:bg-botnexa-600">Behavior</TabsTrigger>
+            <TabsTrigger value="advanced" className="data-[state=active]:bg-botnexa-500 data-[state=active]:text-white dark:data-[state=active]:bg-botnexa-600">Advanced</TabsTrigger>
           </TabsList>
           
           <TabsContent value="personality" className="space-y-4">
@@ -57,7 +57,7 @@ const AISettings = () => {
                 <div className="space-y-2">
                   <Label htmlFor="personality">Personality Type</Label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <Button variant="outline" className="border-botnexa-200 bg-botnexa-50">Professional</Button>
+                    <Button variant="outline" className="border-botnexa-200 bg-botnexa-50 dark:border-botnexa-700 dark:bg-botnexa-950/50 dark:text-botnexa-300">Professional</Button>
                     <Button variant="outline">Friendly</Button>
                     <Button variant="outline">Casual</Button>
                     <Button variant="outline">Technical</Button>
@@ -79,7 +79,7 @@ const AISettings = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button className="bg-botnexa-500 hover:bg-botnexa-600">Save Settings</Button>
+                <Button className="bg-botnexa-500 hover:bg-botnexa-600 text-white">Save Settings</Button>
               </CardFooter>
             </Card>
           </TabsContent>
@@ -147,7 +147,7 @@ const AISettings = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button className="bg-botnexa-500 hover:bg-botnexa-600">Save Settings</Button>
+                <Button className="bg-botnexa-500 hover:bg-botnexa-600 text-white">Save Settings</Button>
               </CardFooter>
             </Card>
           </TabsContent>
@@ -168,7 +168,7 @@ const AISettings = () => {
                   <Label htmlFor="responseLength">Response Length</Label>
                   <div className="grid grid-cols-3 gap-2">
                     <Button variant="outline">Concise</Button>
-                    <Button variant="outline" className="border-botnexa-200 bg-botnexa-50">Balanced</Button>
+                    <Button variant="outline" className="border-botnexa-200 bg-botnexa-50 dark:border-botnexa-700 dark:bg-botnexa-950/50 dark:text-botnexa-300">Balanced</Button>
                     <Button variant="outline">Detailed</Button>
                   </div>
                 </div>
@@ -200,7 +200,7 @@ const AISettings = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button className="bg-botnexa-500 hover:bg-botnexa-600">Save Settings</Button>
+                <Button className="bg-botnexa-500 hover:bg-botnexa-600 text-white">Save Settings</Button>
               </CardFooter>
             </Card>
           </TabsContent>
@@ -221,7 +221,7 @@ const AISettings = () => {
                   <Label htmlFor="model">AI Model</Label>
                   <div className="grid grid-cols-2 gap-2">
                     <Button variant="outline">Standard</Button>
-                    <Button variant="outline" className="border-botnexa-200 bg-botnexa-50">Advanced</Button>
+                    <Button variant="outline" className="border-botnexa-200 bg-botnexa-50 dark:border-botnexa-700 dark:bg-botnexa-950/50 dark:text-botnexa-300">Advanced</Button>
                   </div>
                 </div>
                 
@@ -264,7 +264,7 @@ const AISettings = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button className="bg-botnexa-500 hover:bg-botnexa-600">Save Settings</Button>
+                <Button className="bg-botnexa-500 hover:bg-botnexa-600 text-white">Save Settings</Button>
               </CardFooter>
             </Card>
           </TabsContent>

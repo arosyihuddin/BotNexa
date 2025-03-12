@@ -56,7 +56,7 @@ const Register = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen flex flex-col bg-gradient-to-b from-botnexa-50/50 to-background">
+      <div className="min-h-screen flex flex-col bg-gradient-to-b from-botnexa-50/50 to-background dark:from-botnexa-900/10 dark:to-background">
         <header className="py-4 px-6">
           <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -71,23 +71,23 @@ const Register = () => {
                 <div className="h-8 w-8 rounded-md bg-gradient-to-br from-botnexa-400 to-botnexa-600 flex items-center justify-center text-white font-bold text-lg">
                   B
                 </div>
-                <span className="font-bold text-xl">BotNexa</span>
+                <span className="font-bold text-xl text-foreground">BotNexa</span>
               </Link>
               
               {step === 1 ? (
                 <>
-                  <h1 className="text-2xl font-bold">Create an account</h1>
+                  <h1 className="text-2xl font-bold text-foreground">Create an account</h1>
                   <p className="text-muted-foreground mt-2">Join BotNexa to enhance your WhatsApp experience</p>
                 </>
               ) : (
                 <>
-                  <h1 className="text-2xl font-bold">Registration successful!</h1>
+                  <h1 className="text-2xl font-bold text-foreground">Registration successful!</h1>
                   <p className="text-muted-foreground mt-2">Your account has been created</p>
                 </>
               )}
             </div>
             
-            <Card className="p-6 bg-white/70 backdrop-blur-sm border-border/50 animate-scale-in">
+            <Card className="p-6 bg-white/70 dark:bg-card/50 backdrop-blur-sm border-border/50 animate-scale-in">
               {step === 1 ? (
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div className="space-y-2">
@@ -100,7 +100,7 @@ const Register = () => {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="bg-white"
+                      className="bg-white dark:bg-card"
                     />
                   </div>
                   
@@ -115,7 +115,7 @@ const Register = () => {
                       onChange={handleChange}
                       required
                       autoComplete="email"
-                      className="bg-white"
+                      className="bg-white dark:bg-card"
                     />
                   </div>
                   
@@ -130,7 +130,7 @@ const Register = () => {
                         value={formData.password}
                         onChange={handleChange}
                         required
-                        className="pr-10 bg-white"
+                        className="pr-10 bg-white dark:bg-card"
                       />
                       <button
                         type="button"
@@ -157,7 +157,7 @@ const Register = () => {
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       required
-                      className="bg-white"
+                      className="bg-white dark:bg-card"
                     />
                   </div>
                   
@@ -170,11 +170,11 @@ const Register = () => {
                     />
                     <Label htmlFor="terms" className="text-sm font-normal cursor-pointer">
                       I agree to the{" "}
-                      <a href="#" className="text-botnexa-600 hover:text-botnexa-700 transition-colors">
+                      <a href="#" className="text-botnexa-600 dark:text-botnexa-400 hover:text-botnexa-700 dark:hover:text-botnexa-300 transition-colors">
                         Terms of Service
                       </a>{" "}
                       and{" "}
-                      <a href="#" className="text-botnexa-600 hover:text-botnexa-700 transition-colors">
+                      <a href="#" className="text-botnexa-600 dark:text-botnexa-400 hover:text-botnexa-700 dark:hover:text-botnexa-300 transition-colors">
                         Privacy Policy
                       </a>
                     </Label>
@@ -190,12 +190,12 @@ const Register = () => {
                 </form>
               ) : (
                 <div className="text-center space-y-6 py-4">
-                  <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-                    <CheckCircle2 className="h-8 w-8 text-green-600" />
+                  <div className="mx-auto w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                    <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
                   </div>
                   
                   <div className="space-y-2">
-                    <h3 className="text-xl font-semibold">Account Created Successfully</h3>
+                    <h3 className="text-xl font-semibold text-foreground">Account Created Successfully</h3>
                     <p className="text-muted-foreground">
                       We've sent a confirmation email to <span className="font-medium">{formData.email}</span>
                     </p>
@@ -215,7 +215,7 @@ const Register = () => {
                   <span className="text-muted-foreground">Already have an account?</span>{" "}
                   <Link
                     to="/login"
-                    className="text-botnexa-600 hover:text-botnexa-700 font-medium transition-colors"
+                    className="text-botnexa-600 dark:text-botnexa-400 hover:text-botnexa-700 dark:hover:text-botnexa-300 font-medium transition-colors"
                   >
                     Sign in
                   </Link>

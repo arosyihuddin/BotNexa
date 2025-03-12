@@ -139,6 +139,9 @@ export default {
 			transitionTimingFunction: {
 				'bounce-in': 'cubic-bezier(0.17, 0.67, 0.83, 0.67)',
 				'apple': 'cubic-bezier(0.25, 0.1, 0.25, 1)'
+			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
 			}
 		}
 	},

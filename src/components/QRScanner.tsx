@@ -11,6 +11,8 @@ const QRScanner = () => {
   const [pairingCode, setPairingCode] = useState("");
   const [isScanning, setIsScanning] = useState(false);
   const [qrRefreshCounter, setQrRefreshCounter] = useState(0);
+  const [generatedPairingCode, setGeneratedPairingCode] = useState("");
+  const [showGeneratedCode, setShowGeneratedCode] = useState(false);
   const isMobile = useIsMobile();
 
   // Simulate QR code refresh
@@ -27,8 +29,10 @@ const QRScanner = () => {
   const handlePairingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Pairing with code:", pairingCode);
-    // Here you would handle the pairing process
-    setPairingCode("");
+    // Generate a random 8-digit code
+    const randomCode = Math.floor(10000000 + Math.random() * 90000000).toString();
+    setGeneratedPairingCode(randomCode);
+    setShowGeneratedCode(true);
   };
 
   const refreshQRCode = () => {
@@ -41,8 +45,24 @@ const QRScanner = () => {
     <Card className="w-full max-w-md mx-auto overflow-hidden">
       <Tabs defaultValue="scan" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="scan" onClick={() => setIsScanning(true)}>Scan QR Code</TabsTrigger>
-          <TabsTrigger value="pair" onClick={() => setIsScanning(false)}>Pairing Code</TabsTrigger>
+          <TabsTrigger 
+            value="scan" 
+            onClick={() => {
+              setIsScanning(true);
+              setShowGeneratedCode(false);
+            }}
+          >
+            Scan QR Code
+          </TabsTrigger>
+          <TabsTrigger 
+            value="pair" 
+            onClick={() => {
+              setIsScanning(false);
+              setShowGeneratedCode(false);
+            }}
+          >
+            Pairing Code
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="scan" className="p-4 sm:p-6">
@@ -107,33 +127,58 @@ const QRScanner = () => {
         <TabsContent value="pair" className="p-4 sm:p-6">
           <div className="text-center space-y-4">
             <div className="text-lg font-medium">Connect with pairing code</div>
-            <p className="text-sm text-muted-foreground pb-2">
-              1. Open WhatsApp on your phone
-              <br />
-              2. Tap Menu or Settings and select Linked Devices
-              <br />
-              3. Tap on "Link a Device"
-              <br />
-              4. Enter the 8-digit pairing code
-            </p>
             
-            <form onSubmit={handlePairingSubmit} className="space-y-4">
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-full">
-                  <Input
-                    type="text"
-                    placeholder="Enter 8-digit pairing code"
-                    value={pairingCode}
-                    onChange={(e) => setPairingCode(e.target.value)}
-                    className="text-center tracking-[0.5em] text-lg"
-                    maxLength={8}
-                  />
+            {showGeneratedCode ? (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground pb-2">
+                  Enter this 8-digit code in your WhatsApp:
+                </p>
+                <div className="text-3xl font-mono tracking-wider bg-muted p-4 rounded-lg">
+                  {generatedPairingCode}
                 </div>
-                <Button type="submit" className="w-full bg-botnexa-500 hover:bg-botnexa-600">
-                  Connect
+                <p className="text-sm text-muted-foreground pb-2">
+                  This code will expire in 5 minutes
+                </p>
+                <Button 
+                  onClick={() => setShowGeneratedCode(false)}
+                  variant="outline"
+                  className="mt-2"
+                >
+                  Generate New Code
                 </Button>
               </div>
-            </form>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground pb-2">
+                  1. Open WhatsApp on your phone
+                  <br />
+                  2. Tap Menu or Settings and select Linked Devices
+                  <br />
+                  3. Tap on "Link a Device"
+                </p>
+                
+                <form onSubmit={handlePairingSubmit} className="space-y-4">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-full">
+                      <Input
+                        type="number"
+                        placeholder="Enter your phone number"
+                        value={pairingCode}
+                        onChange={(e) => setPairingCode(e.target.value)}
+                        className="text-center"
+                      />
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-botnexa-500 hover:bg-botnexa-600"
+                      disabled={!pairingCode.trim()}
+                    >
+                      Generate Pairing Code
+                    </Button>
+                  </div>
+                </form>
+              </>
+            )}
           </div>
         </TabsContent>
       </Tabs>

@@ -1,18 +1,16 @@
+
 import { useState, useEffect } from "react";
-import { Switch } from "@/components/ui/switch"; // Import the Switch component
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SidebarProvider, Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
-  Home, BarChart3, Settings, Users, MessageSquare, BrainCircuit, Calendar, Bell, 
-  LogOut, Search, User, Menu, X, CheckCircle2, ChevronRight
+  CheckCircle2, ChevronRight, BrainCircuit, Calendar
 } from "lucide-react";
 import QRScanner from "@/components/QRScanner";
 import ChatHistory from "@/components/ChatHistory";
@@ -22,7 +20,6 @@ import DashboardLayout from "@/components/DashboardLayout";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [isConnected, setIsConnected] = useState(false);
-const [isDarkMode, setIsDarkMode] = useState(false); // Default to light mode
   
   useEffect(() => {
     // Simulate connection status after 5 seconds for demo
@@ -35,11 +32,6 @@ const [isDarkMode, setIsDarkMode] = useState(false); // Default to light mode
     };
   }, []);
   
-  const handleLogout = () => {
-    // This would be your actual logout logic
-    navigate('/login');
-  };
-
   return (
     <DashboardLayout title="Dashboard">
       <PageTransition>
@@ -94,11 +86,7 @@ const ConnectedDashboard = () => {
   const navigate = useNavigate();
   
   return (
-        <div className="space-y-6">
-          <div className="flex items-center">
-            <span className="mr-2">Toggle Dark Mode:</span>
-          </div>
-
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h2 className="text-2xl font-bold tracking-tight">Welcome back, John!</h2>
@@ -107,7 +95,7 @@ const ConnectedDashboard = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50 border-green-200">
+          <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-900">
             <CheckCircle2 className="mr-1 h-3 w-3" />
             Connected
           </Badge>
@@ -207,8 +195,8 @@ const ConnectedDashboard = () => {
             <Card className="hover:bg-secondary/50 transition-colors cursor-pointer" onClick={() => navigate('/features')}>
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="bg-botnexa-100 h-10 w-10 rounded-full flex items-center justify-center">
-                    <BrainCircuit className="h-5 w-5 text-botnexa-600" />
+                  <div className="bg-botnexa-100 h-10 w-10 rounded-full flex items-center justify-center dark:bg-botnexa-950/30">
+                    <BrainCircuit className="h-5 w-5 text-botnexa-600 dark:text-botnexa-400" />
                   </div>
                   <div>
                     <h3 className="font-medium">Explore More Features</h3>
@@ -250,12 +238,12 @@ const ConnectedDashboard = () => {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <label htmlFor="botName" className="text-sm font-medium">Bot Name</label>
-                    <Input id="botName" value="BotNexa Assistant" />
+                    <Input id="botName" defaultValue="BotNexa Assistant" />
                   </div>
                   
                   <div className="space-y-2">
                     <label htmlFor="language" className="text-sm font-medium">Primary Language</label>
-                    <Input id="language" value="English" />
+                    <Input id="language" defaultValue="English" />
                   </div>
                 </div>
                 
@@ -270,7 +258,7 @@ const ConnectedDashboard = () => {
                   <div className="pt-2">
                     <div className="space-y-2">
                       <label htmlFor="personality" className="text-sm font-medium">Bot Personality</label>
-                      <Input id="personality" value="Helpful, professional, and friendly" />
+                      <Input id="personality" defaultValue="Helpful, professional, and friendly" />
                     </div>
                   </div>
                 </div>
@@ -290,31 +278,6 @@ const ConnectedDashboard = () => {
     </div>
   );
 };
-interface NavItemProps {
-  icon: React.ReactNode;
-  label: string;
-  active?: boolean;
-  to: string;
-}
-
-const NavItem = ({ icon, label, active, to }: NavItemProps) => {
-  const navigate = useNavigate();
-  
-  return (
-    <button
-      className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-        active
-          ? "bg-botnexa-50 text-botnexa-700"
-          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-      }`}
-      onClick={() => to && navigate(to)}
-    >
-      {icon}
-      <span>{label}</span>
-      {active && <div className="ml-auto w-1 h-4 bg-botnexa-500 rounded-full" />}
-    </button>
-  );
-};
 
 interface MetricCardProps {
   title: string;
@@ -331,7 +294,7 @@ const MetricCard = ({ title, value, change, description, positive }: MetricCardP
         <p className="text-sm font-medium text-muted-foreground">{title}</p>
         <div className="flex items-baseline gap-2">
           <p className="text-2xl font-bold">{value}</p>
-          <span className={`text-xs font-medium ${positive ? "text-green-600" : "text-red-600"}`}>
+          <span className={`text-xs font-medium ${positive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
             {change}
           </span>
         </div>
@@ -349,14 +312,14 @@ interface ReminderItemProps {
 
 const ReminderItem = ({ title, date, description }: ReminderItemProps) => (
   <div className="flex items-start gap-4 pb-4 last:pb-0 border-b last:border-0 border-border">
-    <div className="mt-1 h-8 w-8 flex-shrink-0 rounded-full bg-botnexa-100 flex items-center justify-center">
-      <Calendar className="h-4 w-4 text-botnexa-600" />
+    <div className="mt-1 h-8 w-8 flex-shrink-0 rounded-full bg-botnexa-100 flex items-center justify-center dark:bg-botnexa-950/30">
+      <Calendar className="h-4 w-4 text-botnexa-600 dark:text-botnexa-400" />
     </div>
     <div className="flex-1 space-y-1">
       <p className="font-medium">{title}</p>
       <p className="text-sm text-muted-foreground">{description}</p>
       <div className="flex items-center">
-        <Badge variant="outline" className="text-xs bg-botnexa-50 text-botnexa-700 border-botnexa-200">
+        <Badge variant="outline" className="text-xs bg-botnexa-50 text-botnexa-700 border-botnexa-200 dark:bg-botnexa-950/30 dark:text-botnexa-300 dark:border-botnexa-800">
           {date}
         </Badge>
       </div>
