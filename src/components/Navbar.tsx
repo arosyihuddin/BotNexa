@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Navbar = () => {
@@ -11,7 +11,12 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.includes(path);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,10 +70,10 @@ const Navbar = () => {
             <NavLink to="/" active={isActive("/")} onClick={() => {}}>
               Home
             </NavLink>
-            <NavLink to="/#features" active={false} onClick={() => scrollToSection('features')}>
+            <NavLink to="/#features" active={location.hash === "#features"} onClick={() => scrollToSection('features')}>
               Features
             </NavLink>
-            <NavLink to="/#pricing" active={false} onClick={() => scrollToSection('pricing')}>
+            <NavLink to="/#pricing" active={location.hash === "#pricing"} onClick={() => scrollToSection('pricing')}>
               Pricing
             </NavLink>
             <div className="ml-4 flex items-center gap-3">
@@ -90,12 +95,17 @@ const Navbar = () => {
               size="icon"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle menu"
+              className="relative"
             >
               {isMobileMenuOpen ? (
                 <X className="h-6 w-6" />
               ) : (
                 <Menu className="h-6 w-6" />
               )}
+              <ChevronDown className={cn(
+                "h-3 w-3 absolute -bottom-1 right-0 transition-transform duration-200",
+                isMobileMenuOpen ? "rotate-180" : "rotate-0"
+              )} />
             </Button>
           </div>
         </div>
@@ -112,10 +122,10 @@ const Navbar = () => {
           <MobileNavLink to="/" active={isActive("/")} onClick={() => {}}>
             Home
           </MobileNavLink>
-          <MobileNavLink to="/#features" active={false} onClick={() => scrollToSection('features')}>
+          <MobileNavLink to="/#features" active={location.hash === "#features"} onClick={() => scrollToSection('features')}>
             Features
           </MobileNavLink>
-          <MobileNavLink to="/#pricing" active={false} onClick={() => scrollToSection('pricing')}>
+          <MobileNavLink to="/#pricing" active={location.hash === "#pricing"} onClick={() => scrollToSection('pricing')}>
             Pricing
           </MobileNavLink>
           <div className="grid grid-cols-2 gap-3 mt-3">

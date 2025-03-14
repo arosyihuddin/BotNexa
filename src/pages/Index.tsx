@@ -152,30 +152,30 @@ const Index = () => {
               <div>
                 <h4 className="font-semibold mb-4">Product</h4>
                 <ul className="space-y-2">
-                  <FooterLink>Features</FooterLink>
-                  <FooterLink>Pricing</FooterLink>
-                  <FooterLink>Documentation</FooterLink>
-                  <FooterLink>API</FooterLink>
+                  <FooterLink to="/#features">Features</FooterLink>
+                  <FooterLink to="/#pricing">Pricing</FooterLink>
+                  <FooterLink to="/dashboard">Dashboard</FooterLink>
+                  <FooterLink to="/login">Login</FooterLink>
                 </ul>
               </div>
               
               <div>
                 <h4 className="font-semibold mb-4">Company</h4>
                 <ul className="space-y-2">
-                  <FooterLink>About</FooterLink>
-                  <FooterLink>Blog</FooterLink>
-                  <FooterLink>Careers</FooterLink>
-                  <FooterLink>Contact</FooterLink>
+                  <FooterLink to="/">About</FooterLink>
+                  <FooterLink to="/">Blog</FooterLink>
+                  <FooterLink to="/">Careers</FooterLink>
+                  <FooterLink to="/">Contact</FooterLink>
                 </ul>
               </div>
               
               <div>
                 <h4 className="font-semibold mb-4">Legal</h4>
                 <ul className="space-y-2">
-                  <FooterLink>Terms</FooterLink>
-                  <FooterLink>Privacy</FooterLink>
-                  <FooterLink>Cookies</FooterLink>
-                  <FooterLink>Licenses</FooterLink>
+                  <FooterLink to="/terms-of-service">Terms</FooterLink>
+                  <FooterLink to="/privacy-policy">Privacy</FooterLink>
+                  <FooterLink to="/">Cookies</FooterLink>
+                  <FooterLink to="/">Licenses</FooterLink>
                 </ul>
               </div>
             </div>
@@ -197,11 +197,16 @@ const PricingFeature = ({ children }: { children: React.ReactNode }) => (
   </li>
 );
 
-const FooterLink = ({ children }: { children: React.ReactNode }) => (
+interface FooterLinkProps {
+  children: React.ReactNode;
+  to: string;
+}
+
+const FooterLink = ({ children, to }: FooterLinkProps) => (
   <li>
-    <a href="#" className="text-white/70 hover:text-white transition-colors">
+    <Link to={to} className="text-white/70 hover:text-white transition-colors">
       {children}
-    </a>
+    </Link>
   </li>
 );
 

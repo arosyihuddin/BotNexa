@@ -80,15 +80,6 @@ const QRScanner = () => {
                   alt="WhatsApp QR Code"
                   className="w-full h-full object-contain"
                 />
-                
-                {/* Scanning animation with adjusted positioning */}
-                <div className="absolute left-0 top-0 w-full h-full pointer-events-none">
-                  <div className="absolute inset-0 z-10 flex items-center justify-center">
-                    <div className="absolute w-full h-0.5 bg-botnexa-400/50 animate-scan">
-                      <div className="absolute left-0 top-0 h-0.5 w-full bg-gradient-to-r from-transparent via-botnexa-500 to-transparent"></div>
-                    </div>
-                  </div>
-                </div>
               </div>
               
               {/* Style for the scanning animation - Fixed with proper syntax */}

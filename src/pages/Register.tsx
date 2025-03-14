@@ -4,54 +4,56 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
-import { Eye, EyeOff, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { EyeIcon, ArrowLeft, EyeOffIcon, LockIcon, MailIcon, UserIcon } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { PageTransition } from "@/lib/animations";
 
 const Register = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState(1);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    // Validate password match
-    if (formData.password !== formData.confirmPassword) {
-      console.error("Passwords don't match");
-      setIsLoading(false);
+    if (!acceptTerms) {
+      toast({
+        title: "Terms not accepted",
+        description: "Please accept the terms and privacy policy to continue.",
+        variant: "destructive",
+      });
       return;
     }
     
+    setIsLoading(true);
+    
     try {
-      // This would be your actual registration logic
+      // Simulate API request
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Registration success:", formData);
-      setStep(2);
+      
+      // Redirect to dashboard on successful registration
+      navigate("/dashboard");
+      
+      toast({
+        title: "Account created",
+        description: "Your account has been created successfully.",
+      });
     } catch (error) {
-      console.error("Registration failed:", error);
+      toast({
+        title: "Registration failed",
+        description: "There was an error creating your account. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const goToDashboard = () => {
-    navigate("/dashboard");
   };
 
   return (
@@ -67,160 +69,120 @@ const Register = () => {
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="w-full max-w-md mx-auto">
             <div className="text-center mb-8">
-              <Link to="/" className="inline-flex items-center gap-2 mb-6">
-                <div className="h-8 w-8 rounded-md bg-gradient-to-br from-botnexa-400 to-botnexa-600 flex items-center justify-center text-white font-bold text-lg">
-                  B
-                </div>
-                <span className="font-bold text-xl text-foreground">BotNexa</span>
-              </Link>
-              
-              {step === 1 ? (
-                <>
-                  <h1 className="text-2xl font-bold text-foreground">Create an account</h1>
-                  <p className="text-muted-foreground mt-2">Join BotNexa to enhance your WhatsApp experience</p>
-                </>
-              ) : (
-                <>
-                  <h1 className="text-2xl font-bold text-foreground">Registration successful!</h1>
-                  <p className="text-muted-foreground mt-2">Your account has been created</p>
-                </>
-              )}
+              <h1 className="text-2xl font-bold text-foreground">Create an account</h1>
+              <p className="text-muted-foreground mt-2">
+                Sign up to get started with BotNexa
+              </p>
             </div>
             
             <Card className="p-6 bg-white/70 dark:bg-card/50 backdrop-blur-sm border-border/50 animate-scale-in">
-              {step === 1 ? (
-                <form onSubmit={handleRegister} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <div className="relative">
+                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="name"
-                      name="name"
                       type="text"
                       placeholder="John Doe"
-                      value={formData.name}
-                      onChange={handleChange}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                       required
-                      className="bg-white dark:bg-card"
+                      autoComplete="name"
+                      className="pl-10 bg-white dark:bg-card"
                     />
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="relative">
+                    <MailIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="email"
-                      name="email"
                       type="email"
                       placeholder="your@email.com"
-                      value={formData.email}
-                      onChange={handleChange}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       required
                       autoComplete="email"
-                      className="bg-white dark:bg-card"
+                      className="pl-10 bg-white dark:bg-card"
                     />
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                        className="pr-10 bg-white dark:bg-card"
-                      />
-                      <button
-                        type="button"
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        onClick={() => setShowPassword(!showPassword)}
-                        aria-label={showPassword ? "Hide password" : "Show password"}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      id="confirmPassword"
-                      name="confirmPassword"
+                      id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="bg-white dark:bg-card"
+                      autoComplete="new-password"
+                      className="pl-10 pr-10 bg-white dark:bg-card"
+                      minLength={8}
                     />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                    </button>
                   </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="terms" 
-                      checked={agreeTerms}
-                      onCheckedChange={(checked) => setAgreeTerms(checked as boolean)}
-                      required
-                    />
-                    <Label htmlFor="terms" className="text-sm font-normal cursor-pointer">
+                </div>
+                
+                <div className="flex items-start space-x-2 py-2">
+                  <Checkbox 
+                    id="terms" 
+                    checked={acceptTerms}
+                    onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
+                  />
+                  <div className="grid gap-1.5 leading-none">
+                    <label
+                      htmlFor="terms"
+                      className="text-sm text-muted-foreground font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
                       I agree to the{" "}
-                      <a href="#" className="text-botnexa-600 dark:text-botnexa-400 hover:text-botnexa-700 dark:hover:text-botnexa-300 transition-colors">
+                      <Link 
+                        to="/terms-of-service" 
+                        className="text-botnexa-600 dark:text-botnexa-400 hover:text-botnexa-700 dark:hover:text-botnexa-300 transition-colors"
+                      >
                         Terms of Service
-                      </a>{" "}
+                      </Link>{" "}
                       and{" "}
-                      <a href="#" className="text-botnexa-600 dark:text-botnexa-400 hover:text-botnexa-700 dark:hover:text-botnexa-300 transition-colors">
+                      <Link 
+                        to="/privacy-policy" 
+                        className="text-botnexa-600 dark:text-botnexa-400 hover:text-botnexa-700 dark:hover:text-botnexa-300 transition-colors"
+                      >
                         Privacy Policy
-                      </a>
-                    </Label>
+                      </Link>
+                    </label>
                   </div>
-                  
-                  <Button
-                    type="submit"
-                    className="w-full bg-botnexa-500 hover:bg-botnexa-600"
-                    disabled={isLoading || !agreeTerms}
-                  >
-                    {isLoading ? "Creating account..." : "Create account"}
-                  </Button>
-                </form>
-              ) : (
-                <div className="text-center space-y-6 py-4">
-                  <div className="mx-auto w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                    <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-semibold text-foreground">Account Created Successfully</h3>
-                    <p className="text-muted-foreground">
-                      We've sent a confirmation email to <span className="font-medium">{formData.email}</span>
-                    </p>
-                  </div>
-                  
-                  <Button
-                    onClick={goToDashboard}
-                    className="w-full bg-botnexa-500 hover:bg-botnexa-600"
-                  >
-                    Go to Dashboard
-                  </Button>
                 </div>
-              )}
+                
+                <Button
+                  type="submit"
+                  className="w-full bg-botnexa-500 hover:bg-botnexa-600"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Creating account..." : "Create account"}
+                </Button>
+              </form>
               
-              {step === 1 && (
-                <div className="mt-6 text-center text-sm">
-                  <span className="text-muted-foreground">Already have an account?</span>{" "}
-                  <Link
-                    to="/login"
-                    className="text-botnexa-600 dark:text-botnexa-400 hover:text-botnexa-700 dark:hover:text-botnexa-300 font-medium transition-colors"
-                  >
-                    Sign in
-                  </Link>
-                </div>
-              )}
+              <div className="mt-6 text-center text-sm">
+                <span className="text-muted-foreground">Already have an account?</span>{" "}
+                <Link
+                  to="/login"
+                  className="text-botnexa-600 dark:text-botnexa-400 hover:text-botnexa-700 dark:hover:text-botnexa-300 font-medium transition-colors"
+                >
+                  Sign in
+                </Link>
+              </div>
             </Card>
           </div>
         </main>

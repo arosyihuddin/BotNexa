@@ -1,9 +1,9 @@
 
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
   Home, BarChart3, Settings, Users, MessageSquare, BrainCircuit, Calendar, Bell, 
-  LogOut, Search, Menu, X
+  LogOut, Search, Menu, X, Activity, Database, Zap, ArrowLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,24 +17,40 @@ import { cn } from "@/lib/utils";
 interface DashboardLayoutProps {
   children: ReactNode;
   title: string;
+  showBackButton?: boolean;
+  onBack?: () => void;
 }
 
-const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
+const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+  
+  // Update sidebar state when mobile status changes
+  useEffect(() => {
+    setIsSidebarOpen(!isMobile);
+  }, [isMobile]);
   
   const handleLogout = () => {
     navigate('/login');
+  };
+  
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate(-1);
+    }
   };
 
   return (
     <PageTransition>
       <div className="min-h-screen bg-background flex flex-col">
-        <SidebarProvider>
-          <div className="flex min-h-screen">
+        <SidebarProvider defaultOpen={!isMobile}>
+          <div className="flex min-h-screen w-full">
             {/* Sidebar */}
-            <Sidebar className="border-r border-border">
+            <Sidebar className="border-r border-border z-30">
               <SidebarHeader className="py-4 px-4 flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-md bg-gradient-to-br from-botnexa-400 to-botnexa-600 flex items-center justify-center text-white font-bold text-lg">
@@ -42,12 +58,9 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
                   </div>
                   <span className="font-bold text-xl">BotNexa</span>
                 </div>
-                
                 {isMobile && (
-                  <SidebarTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <X className="h-5 w-5" />
-                    </Button>
+                  <SidebarTrigger>
+                    <Menu className="h-5 w-5" />
                   </SidebarTrigger>
                 )}
               </SidebarHeader>
@@ -91,6 +104,12 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
                     to="/analytics" 
                   />
                   <NavItem 
+                    icon={<Activity className="h-5 w-5" />} 
+                    label="Log Activity" 
+                    active={location.pathname === '/log-activity'} 
+                    to="/log-activity" 
+                  />
+                  <NavItem 
                     icon={<Settings className="h-5 w-5" />} 
                     label="Settings" 
                     active={location.pathname === '/settings'} 
@@ -119,15 +138,20 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-h-0 w-full">
               {/* Header */}
-              <header className="h-14 border-b border-border flex items-center justify-between px-4">
+              <header className="h-14 border-b border-border flex items-center justify-between px-4 sticky top-0 bg-background/95 backdrop-blur-sm z-20">
                 <div className="flex items-center gap-4">
                   {isMobile && (
-                    <SidebarTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <Menu className="h-5 w-5" />
-                      </Button>
+                    <SidebarTrigger>
+                      <X className="h-5 w-5" />
                     </SidebarTrigger>
                   )}
+                  
+                  {showBackButton && (
+                    <Button variant="ghost" size="icon" onClick={handleBack} className="mr-1">
+                      <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                  )}
+                  
                   <h1 className="text-xl font-semibold">{title}</h1>
                 </div>
                 
