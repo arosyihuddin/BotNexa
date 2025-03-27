@@ -1,5 +1,5 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { 
   BrainCircuit, MessageSquare, UploadCloud, Database, Upload, 
-  File, Trash2, Globe, FileText, X, Plus, ExternalLink
+  File, Trash2, Globe, FileText, X, Plus, ExternalLink, ChevronLeft
 } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
+import { UserService, UserBot } from "@/services/user.service";
+import { useToast } from "@/hooks/use-toast";
 
 interface UploadedDocument {
   id: string;
@@ -30,7 +32,12 @@ interface ConnectedSource {
   url?: string;
 }
 
-const AISettings = () => {
+const BotSettings = () => {
+  const { botId } = useParams<{ botId: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [bot, setBot] = useState<UserBot | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("personality");
   const [showTextInput, setShowTextInput] = useState(false);
   const [newDocumentText, setNewDocumentText] = useState("");
@@ -65,6 +72,45 @@ const AISettings = () => {
       type: "database"
     }
   ]);
+
+  useEffect(() => {
+    const loadBot = async () => {
+      if (!botId) {
+        navigate('/bot-management');
+        return;
+      }
+      
+      setIsLoading(true);
+      try {
+        // This is a placeholder for fetching the specific bot
+        // In a real app, you'd fetch from the API
+        const userBots = await UserService.getUserBots();
+        const foundBot = userBots.find(b => b.id === botId);
+        
+        if (foundBot) {
+          setBot(foundBot);
+        } else {
+          toast({
+            title: "Error",
+            description: "Bot not found",
+            variant: "destructive",
+          });
+          navigate('/bot-management');
+        }
+      } catch (error) {
+        console.error("Error loading bot:", error);
+        toast({
+          title: "Error",
+          description: "Could not load bot details",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadBot();
+  }, [botId, navigate, toast]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -129,14 +175,31 @@ const AISettings = () => {
     else return (bytes / 1048576).toFixed(1) + ' MB';
   };
 
+  const handleBack = () => {
+    navigate('/bot-management');
+  };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout title="Bot Settings" showBackButton onBack={handleBack}>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin h-8 w-8 border-4 border-botnexa-500 border-t-transparent rounded-full"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
-    <DashboardLayout title="AI Settings">
+    <DashboardLayout title={`${bot?.name || 'Bot'} Settings`} showBackButton onBack={handleBack}>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" onClick={handleBack}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight">AI Agent Configuration</h2>
+            <h2 className="text-2xl font-bold tracking-tight">{bot?.name || 'Bot'} Settings</h2>
             <p className="text-muted-foreground">
-              Configure your AI assistant's personality, knowledge base, and behavior.
+              Configure your bot's personality, knowledge base, and behavior.
             </p>
           </div>
         </div>
@@ -157,13 +220,13 @@ const AISettings = () => {
                   Personality Settings
                 </CardTitle>
                 <CardDescription>
-                  Define how your AI agent should interact with users
+                  Define how your bot should interact with users
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="botName">Bot Name</Label>
-                  <Input id="botName" placeholder="BotNexa Assistant" />
+                  <Input id="botName" placeholder="BotNexa Assistant" defaultValue={bot?.name} />
                   <p className="text-xs text-muted-foreground">
                     This name will be displayed to users when the bot introduces itself.
                   </p>
@@ -535,4 +598,4 @@ const AISettings = () => {
   );
 };
 
-export default AISettings;
+export default BotSettings;

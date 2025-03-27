@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft, Mail, Check } from "lucide-react";
 import { PageTransition } from "@/lib/animations";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -20,8 +21,12 @@ const ForgotPassword = () => {
     setIsLoading(true);
     
     try {
-      // Simulate API request
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
+      });
+      
+      if (error) throw error;
+      
       setIsSubmitted(true);
       toast({
         title: "Reset link sent",
@@ -29,6 +34,7 @@ const ForgotPassword = () => {
         variant: "default",
       });
     } catch (error) {
+      console.error("Password reset error:", error);
       toast({
         title: "Error",
         description: "There was an error sending the reset link. Please try again.",

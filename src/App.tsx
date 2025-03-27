@@ -1,59 +1,119 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { Suspense } from "react";
+
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import ForgotPassword from "./pages/ForgotPassword";
-import TermsOfService from "./pages/TermsOfService";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Dashboard from "./pages/Dashboard";
-import AISettings from "./pages/AISettings";
 import Conversations from "./pages/Conversations";
-import Reminders from "./pages/Reminders";
-import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import Contacts from "./pages/Contacts";
-import LogActivity from "./pages/LogActivity";
+import Analytics from "./pages/Analytics";
+import Reminders from "./pages/Reminders";
+import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
+import Features from "./pages/Features";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import LogActivity from "./pages/LogActivity";
+import BotManagement from "./pages/BotManagement";
+import BotSettings from "./pages/BotSettings";
+import AuthMiddleware from "./components/AuthMiddleware";
+import { ThemeProvider } from "./components/ThemeProvider";
+import { Toaster } from "./components/ui/toaster";
+import { Toaster as Sonner } from "./components/ui/sonner";
+import { useEffect } from "react";
+import { WhatsAppService } from "./services/whatsapp.service";
 
-const queryClient = new QueryClient();
+import "./App.css";
 
-const App = () => {
+function App() {
+  useEffect(() => {
+    // Initialize WhatsApp Service
+    WhatsAppService.initialize();
+  }, []);
+
   return (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="light" storageKey="botnexa-theme">
-      <TooltipProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="botnexa-theme">
+      <Router>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Index />} />
+          <Route path="/login" element={
+            <AuthMiddleware requireAuth={false}>
+              <Login />
+            </AuthMiddleware>
+          } />
+          <Route path="/register" element={
+            <AuthMiddleware requireAuth={false}>
+              <Register />
+            </AuthMiddleware>
+          } />
+          <Route path="/forgot-password" element={
+            <AuthMiddleware requireAuth={false}>
+              <ForgotPassword />
+            </AuthMiddleware>
+          } />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/features" element={<Features />} />
+          
+          {/* Protected routes */}
+          <Route path="/dashboard" element={
+            <AuthMiddleware requireAuth={true}>
+              <Dashboard />
+            </AuthMiddleware>
+          } />
+          <Route path="/conversations" element={
+            <AuthMiddleware requireAuth={true}>
+              <Conversations />
+            </AuthMiddleware>
+          } />
+          <Route path="/contacts" element={
+            <AuthMiddleware requireAuth={true}>
+              <Contacts />
+            </AuthMiddleware>
+          } />
+          <Route path="/analytics" element={
+            <AuthMiddleware requireAuth={true}>
+              <Analytics />
+            </AuthMiddleware>
+          } />
+          <Route path="/reminders" element={
+            <AuthMiddleware requireAuth={true}>
+              <Reminders />
+            </AuthMiddleware>
+          } />
+          <Route path="/settings" element={
+            <AuthMiddleware requireAuth={true}>
+              <Settings />
+            </AuthMiddleware>
+          } />
+          <Route path="/log-activity" element={
+            <AuthMiddleware requireAuth={true}>
+              <LogActivity />
+            </AuthMiddleware>
+          } />
+          <Route path="/bot-management" element={
+            <AuthMiddleware requireAuth={true}>
+              <BotManagement />
+            </AuthMiddleware>
+          } />
+          <Route path="/bot-settings/:botId" element={
+            <AuthMiddleware requireAuth={true}>
+              <BotSettings />
+            </AuthMiddleware>
+          } />
+          
+          {/* 404 route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        
+        {/* Toasters */}
         <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Suspense fallback={<div>Loading...</div>}><Index /></Suspense>} />
-            <Route path="/login" element={<Suspense fallback={<div>Loading...</div>}><Login /></Suspense>} />
-            <Route path="/register" element={<Suspense fallback={<div>Loading...</div>}><Register /></Suspense>} />
-            <Route path="/forgot-password" element={<Suspense fallback={<div>Loading...</div>}><ForgotPassword /></Suspense>} />
-            <Route path="/terms-of-service" element={<Suspense fallback={<div>Loading...</div>}><TermsOfService /></Suspense>} />
-            <Route path="/privacy-policy" element={<Suspense fallback={<div>Loading...</div>}><PrivacyPolicy /></Suspense>} />
-            <Route path="/dashboard" element={<Suspense fallback={<div>Loading...</div>}><Dashboard /></Suspense>} />
-            <Route path="/ai-settings" element={<Suspense fallback={<div>Loading...</div>}><AISettings /></Suspense>} />
-            <Route path="/conversations" element={<Suspense fallback={<div>Loading...</div>}><Conversations /></Suspense>} />
-            <Route path="/reminders" element={<Suspense fallback={<div>Loading...</div>}><Reminders /></Suspense>} />
-            <Route path="/analytics" element={<Suspense fallback={<div>Loading...</div>}><Analytics /></Suspense>} />
-            <Route path="/settings" element={<Suspense fallback={<div>Loading...</div>}><Settings /></Suspense>} />
-            <Route path="/contacts" element={<Suspense fallback={<div>Loading...</div>}><Contacts /></Suspense>} />
-            <Route path="/log-activity" element={<Suspense fallback={<div>Loading...</div>}><LogActivity /></Suspense>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+        <Sonner position="top-right" closeButton />
+      </Router>
     </ThemeProvider>
-  </QueryClientProvider>
-);
-
-};
+  );
+}
 
 export default App;

@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { User, Users, Search, MessageSquare, Phone, Mail, Info } from 'lucide-react';
+import { User, Users, Search, MessageSquare, Phone, Mail, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
@@ -16,17 +17,8 @@ import {
 } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-
-type Contact = {
-  id: number;
-  name: string;
-  email?: string;
-  phone?: string;
-  members?: number;
-  type: 'contact' | 'group';
-  status?: 'online' | 'offline' | 'away';
-  lastSeen?: string;
-};
+import { dummyContacts } from '@/lib/dummy-data';
+import { Contact } from '@/types/app-types';
 
 const Contacts = () => {
   const [selectedTab, setSelectedTab] = useState('all');
@@ -35,16 +27,7 @@ const Contacts = () => {
   const [isContactDetailsOpen, setIsContactDetailsOpen] = useState(false);
   const navigate = useNavigate();
 
-  const contacts: Contact[] = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', phone: '+1 234 567 890', type: 'contact', status: 'online' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', phone: '+1 345 678 901', type: 'contact', status: 'offline', lastSeen: '2 hours ago' },
-    { id: 3, name: 'Marketing Team', members: 12, type: 'group' },
-    { id: 4, name: 'Support Team', members: 8, type: 'group' },
-    { id: 5, name: 'Alex Johnson', email: 'alex@example.com', phone: '+1 456 789 012', type: 'contact', status: 'away' },
-    { id: 6, name: 'Sarah Williams', email: 'sarah@example.com', phone: '+1 567 890 123', type: 'contact', status: 'offline', lastSeen: 'yesterday' },
-    { id: 7, name: 'Development Team', members: 15, type: 'group' },
-    { id: 8, name: 'Design Team', members: 6, type: 'group' },
-  ];
+  const contacts = dummyContacts;
 
   const filteredContacts = contacts.filter(contact => 
     contact.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -52,7 +35,10 @@ const Contacts = () => {
 
   const getFilteredContacts = (tabValue: string) => {
     if (tabValue === 'all') return filteredContacts;
-    return filteredContacts.filter(c => c.type === (tabValue === 'contacts' ? 'contact' : 'group'));
+    // For demonstration purposes, let's assume contacts with 'customer' tag are individuals
+    // and contacts with 'lead' tag are groups
+    if (tabValue === 'contacts') return filteredContacts.filter(c => c.tags.includes('customer'));
+    return filteredContacts.filter(c => c.tags.includes('lead'));
   };
 
   const handleViewContact = (contact: Contact) => {
@@ -60,7 +46,7 @@ const Contacts = () => {
     setIsContactDetailsOpen(true);
   };
 
-  const handleStartConversation = (contactId: number) => {
+  const handleStartConversation = (contactId: string) => {
     navigate(`/conversations?contact=${contactId}`);
   };
 
@@ -82,13 +68,19 @@ const Contacts = () => {
 
         <Card>
           <CardHeader className="pb-3">
-            <Tabs defaultValue="all" onValueChange={setSelectedTab} className="w-full">
-              <TabsList className="w-full justify-start">
-                <TabsTrigger value="all" className="flex-1">All</TabsTrigger>
-                <TabsTrigger value="contacts" className="flex-1">Contacts</TabsTrigger>
-                <TabsTrigger value="groups" className="flex-1">Groups</TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <div className="flex justify-between items-center">
+              <Tabs defaultValue="all" onValueChange={setSelectedTab} className="w-full">
+                <TabsList className="w-full justify-start">
+                  <TabsTrigger value="all" className="flex-1">All</TabsTrigger>
+                  <TabsTrigger value="contacts" className="flex-1">Customers</TabsTrigger>
+                  <TabsTrigger value="groups" className="flex-1">Leads</TabsTrigger>
+                </TabsList>
+              </Tabs>
+              <Button size="sm" className="bg-botnexa-500 hover:bg-botnexa-600 ml-2">
+                <Plus className="h-4 w-4 mr-2" />
+                New Contact
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -104,16 +96,12 @@ const Contacts = () => {
                   >
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-botnexa-100 dark:bg-botnexa-950/30 flex items-center justify-center">
-                        {contact.type === 'contact' ? (
-                          <User className="h-5 w-5 text-botnexa-600 dark:text-botnexa-400" />
-                        ) : (
-                          <Users className="h-5 w-5 text-botnexa-600 dark:text-botnexa-400" />
-                        )}
+                        <User className="h-5 w-5 text-botnexa-600 dark:text-botnexa-400" />
                       </div>
                       <div>
                         <h3 className="font-medium">{contact.name}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {contact.type === 'contact' ? contact.phone : `${contact.members} members`}
+                          {contact.phoneNumber}
                         </p>
                       </div>
                     </div>
@@ -139,7 +127,7 @@ const Contacts = () => {
           <DialogHeader>
             <DialogTitle>Contact Details</DialogTitle>
             <DialogDescription>
-              {selectedContact?.type === 'contact' ? 'View contact information' : 'View group information'}
+              View contact information
             </DialogDescription>
           </DialogHeader>
           
@@ -153,45 +141,31 @@ const Contacts = () => {
                 </Avatar>
                 <h3 className="text-xl font-bold">{selectedContact.name}</h3>
                 
-                {selectedContact.type === 'contact' && selectedContact.status && (
-                  <div className="mt-1">
-                    <Badge variant="outline" className={
-                      selectedContact.status === 'online' 
-                        ? 'bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400 border-green-200 dark:border-green-900' 
-                        : selectedContact.status === 'away'
-                          ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border-amber-200 dark:border-amber-900'
-                          : 'bg-gray-50 text-gray-700 dark:bg-gray-950/30 dark:text-gray-400 border-gray-200 dark:border-gray-900'
-                    }>
-                      {selectedContact.status === 'online' ? 'Online' : 
-                       selectedContact.status === 'away' ? 'Away' : 
-                       `Offline ${selectedContact.lastSeen ? '· ' + selectedContact.lastSeen : ''}`}
+                <div className="mt-1 flex flex-wrap gap-1 justify-center">
+                  {selectedContact.tags.map(tag => (
+                    <Badge key={tag} variant="outline" className="capitalize">
+                      {tag}
                     </Badge>
-                  </div>
-                )}
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-3 pt-2">
-                {selectedContact.type === 'contact' ? (
-                  <>
-                    {selectedContact.phone && (
-                      <div className="flex items-center gap-3">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                        <span>{selectedContact.phone}</span>
-                      </div>
-                    )}
-                    {selectedContact.email && (
-                      <div className="flex items-center gap-3">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <span>{selectedContact.email}</span>
-                      </div>
-                    )}
-                  </>
-                ) : (
+                <div className="flex items-center gap-3">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <span>{selectedContact.phoneNumber}</span>
+                </div>
+                {selectedContact.email && (
                   <div className="flex items-center gap-3">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <span>{selectedContact.members} members</span>
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span>{selectedContact.email}</span>
                   </div>
                 )}
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="bg-botnexa-50 text-botnexa-700 dark:bg-botnexa-950/30 dark:text-botnexa-400 border-botnexa-200 dark:border-botnexa-900">
+                    Last contact: {new Date(selectedContact.lastInteraction).toLocaleDateString()}
+                  </Badge>
+                </div>
               </div>
               
               <div className="flex justify-end pt-4">

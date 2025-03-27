@@ -9,26 +9,163 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
-  CheckCircle2, ChevronRight, BrainCircuit, Calendar
+  CheckCircle2, ChevronRight, BrainCircuit, Calendar, MessageSquare, Check, Bot, Plus
 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import QRScanner from "@/components/QRScanner";
-import ChatHistory from "@/components/ChatHistory";
 import { PageTransition } from "@/lib/animations";
 import DashboardLayout from "@/components/DashboardLayout";
+import { UserService, UserBot } from "@/services/user.service";
+import { WhatsAppService } from "@/services/whatsapp.service";
+
+// Sample chat data - in a real app, this would come from an API
+const recentChats = [
+  {
+    id: "1",
+    name: "John Smith",
+    lastMessage: "I need help with my order",
+    time: "2m ago",
+    unread: 2,
+    messages: [
+      {
+        id: "1-1",
+        content: "Hello, I need help with my order #12345",
+        sender: "contact",
+        timestamp: "10:30 AM"
+      },
+      {
+        id: "1-2",
+        content: "What seems to be the issue with your order?",
+        sender: "user",
+        timestamp: "10:32 AM",
+        status: "read"
+      },
+      {
+        id: "1-3",
+        content: "I ordered the wrong size and would like to change it",
+        sender: "contact",
+        timestamp: "10:33 AM"
+      },
+      {
+        id: "1-4",
+        content: "I need help with my order",
+        sender: "contact",
+        timestamp: "10:35 AM"
+      }
+    ]
+  },
+  {
+    id: "2",
+    name: "Sarah Johnson",
+    lastMessage: "Thank you for the information",
+    time: "1h ago",
+    unread: 0,
+    messages: [
+      {
+        id: "2-1",
+        content: "Hi, I'm looking for information about your premium plan",
+        sender: "contact",
+        timestamp: "Yesterday"
+      },
+      {
+        id: "2-2",
+        content: "Our premium plan includes 24/7 support, unlimited messages, and priority feature access.",
+        sender: "user",
+        timestamp: "Yesterday",
+        status: "read"
+      },
+      {
+        id: "2-3",
+        content: "That sounds great! Can you send me a detailed pricing sheet?",
+        sender: "contact",
+        timestamp: "Yesterday"
+      },
+      {
+        id: "2-4",
+        content: "Of course! I'll send it right away. Anything else you'd like to know?",
+        sender: "user",
+        timestamp: "Yesterday",
+        status: "read"
+      },
+      {
+        id: "2-5",
+        content: "Thank you for the information",
+        sender: "contact",
+        timestamp: "1h ago"
+      }
+    ]
+  },
+  {
+    id: "3",
+    name: "Michael Brown",
+    lastMessage: "When will my order arrive?",
+    time: "3h ago",
+    unread: 1,
+    messages: [
+      {
+        id: "3-1",
+        content: "I placed an order yesterday, #54321",
+        sender: "contact",
+        timestamp: "Yesterday"
+      },
+      {
+        id: "3-2",
+        content: "I can see your order has been processed. It should ship today.",
+        sender: "user",
+        timestamp: "Yesterday",
+        status: "read"
+      },
+      {
+        id: "3-3",
+        content: "When will my order arrive?",
+        sender: "contact",
+        timestamp: "3h ago"
+      }
+    ]
+  },
+  {
+    id: "4",
+    name: "Emily Davis",
+    lastMessage: "I'd like to schedule a call",
+    time: "1d ago",
+    unread: 0,
+    messages: [
+      {
+        id: "4-1",
+        content: "I'd like to schedule a call to discuss your services",
+        sender: "contact",
+        timestamp: "1d ago"
+      }
+    ]
+  }
+];
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [isConnected, setIsConnected] = useState(false);
+  const [userBots, setUserBots] = useState<UserBot[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Simulate connection status after 5 seconds for demo
-    const timer = setTimeout(() => {
-      setIsConnected(true);
-    }, 5000);
-    
-    return () => {
-      clearTimeout(timer);
+    const loadBots = async () => {
+      try {
+        setIsLoading(true);
+        const bots = await UserService.getUserBots();
+        setUserBots(bots);
+        
+        // Check if any WhatsApp bot is connected
+        const whatsappBot = bots.find(bot => bot.type === 'whatsapp');
+        if (whatsappBot) {
+          setIsConnected(whatsappBot.isConnected);
+        }
+      } catch (error) {
+        console.error("Error loading bots:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
+    
+    loadBots();
   }, []);
   
   return (
@@ -40,9 +177,9 @@ const Dashboard = () => {
             {/* Content */}
             <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
               {isConnected ? (
-                <ConnectedDashboard />
+                <ConnectedDashboard userBots={userBots} />
               ) : (
-                <ConnectionSetup />
+                <ConnectionSetup userBots={userBots} onConnect={() => setIsConnected(true)} />
               )}
             </main>
           </div>
@@ -52,7 +189,15 @@ const Dashboard = () => {
   );
 };
 
-const ConnectionSetup = () => {
+interface ConnectionSetupProps {
+  userBots: UserBot[];
+  onConnect: () => void;
+}
+
+const ConnectionSetup = ({ userBots, onConnect }: ConnectionSetupProps) => {
+  const navigate = useNavigate();
+  const whatsappBot = userBots.find(bot => bot.type === 'whatsapp');
+  
   return (
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-6 md:mb-8">
@@ -62,7 +207,26 @@ const ConnectionSetup = () => {
         </p>
       </div>
       
-      <QRScanner />
+      {whatsappBot ? (
+        <QRScanner botId={whatsappBot.id} onConnected={onConnect} />
+      ) : (
+        <Card className="text-center p-6 space-y-4">
+          <div className="flex flex-col items-center">
+            <Bot className="h-12 w-12 text-muted-foreground mb-2" />
+            <h2 className="text-lg font-medium">No WhatsApp Bot Setup</h2>
+            <p className="text-muted-foreground max-w-md mx-auto mb-4">
+              You need to create a WhatsApp bot before you can connect to WhatsApp.
+            </p>
+            <Button 
+              className="bg-botnexa-500 hover:bg-botnexa-600"
+              onClick={() => navigate('/bot-management')}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Create WhatsApp Bot
+            </Button>
+          </div>
+        </Card>
+      )}
       
       <div className="mt-6 md:mt-8 text-center text-xs sm:text-sm text-muted-foreground">
         <p>
@@ -81,7 +245,11 @@ const ConnectionSetup = () => {
   );
 };
 
-const ConnectedDashboard = () => {
+interface ConnectedDashboardProps {
+  userBots: UserBot[];
+}
+
+const ConnectedDashboard = ({ userBots }: ConnectedDashboardProps) => {
   const navigate = useNavigate();
   
   return (
@@ -98,6 +266,14 @@ const ConnectedDashboard = () => {
             <CheckCircle2 className="mr-1 h-3 w-3" />
             Connected
           </Badge>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate('/bot-management')}
+          >
+            <Bot className="mr-1 h-4 w-4" />
+            Manage Bots
+          </Button>
         </div>
       </div>
       
@@ -142,12 +318,72 @@ const ConnectedDashboard = () => {
           
           <div className="grid gap-4 md:grid-cols-2">
             <Card className="col-span-1">
-              <CardHeader>
-                <CardTitle>Conversations</CardTitle>
-                <CardDescription>Recent chat history with your bot</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div>
+                  <CardTitle>Recent Conversations</CardTitle>
+                  <CardDescription>Latest chat messages</CardDescription>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs text-muted-foreground"
+                  onClick={() => navigate('/conversations')}
+                >
+                  View all
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
               </CardHeader>
               <CardContent className="p-0">
-                <ChatHistory />
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-0">
+                    {recentChats.map((chat) => (
+                      <div
+                        key={chat.id}
+                        className="w-full text-left px-4 py-3 border-b hover:bg-muted/30 transition-colors cursor-pointer"
+                        onClick={() => navigate(`/conversations?chat=${chat.id}`)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage 
+                              src={`https://i.pravatar.cc/150?u=${chat.id}`} 
+                              alt={chat.name} 
+                            />
+                            <AvatarFallback>{chat.name[0]}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <p className={`font-medium truncate ${chat.unread > 0 ? "font-semibold" : ""}`}>
+                                {chat.name}
+                              </p>
+                              <span className="text-xs text-muted-foreground">
+                                {chat.time}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <p className={`text-sm text-muted-foreground truncate ${chat.unread > 0 ? "text-foreground font-medium" : ""}`}>
+                                {chat.lastMessage}
+                              </p>
+                              {chat.unread > 0 ? (
+                                <Badge className="ml-2 bg-botnexa-500 hover:bg-botnexa-600">
+                                  {chat.unread}
+                                </Badge>
+                              ) : (
+                                chat.messages.length > 0 && 
+                                chat.messages[chat.messages.length - 1].sender === "user" && 
+                                chat.messages[chat.messages.length - 1].status === "read" && (
+                                  <div className="flex ml-2">
+                                    <Check className="h-3 w-3 text-botnexa-500" />
+                                    <Check className="h-3 w-3 -ml-1 text-botnexa-500" />
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
               </CardContent>
             </Card>
             
@@ -190,7 +426,7 @@ const ConnectedDashboard = () => {
             </Card>
           </div>
           
-          <div className="mt-4">
+          <div className="grid gap-4 md:grid-cols-2">
             <Card className="hover:bg-secondary/50 transition-colors cursor-pointer" onClick={() => navigate('/features')}>
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -200,6 +436,21 @@ const ConnectedDashboard = () => {
                   <div>
                     <h3 className="font-medium">Explore More Features</h3>
                     <p className="text-sm text-muted-foreground">Configure AI Agent, RAG, and Reminders</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </CardContent>
+            </Card>
+            
+            <Card className="hover:bg-secondary/50 transition-colors cursor-pointer" onClick={() => navigate('/bot-management')}>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-botnexa-100 h-10 w-10 rounded-full flex items-center justify-center dark:bg-botnexa-950/30">
+                    <Bot className="h-5 w-5 text-botnexa-600 dark:text-botnexa-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Manage Your Bots</h3>
+                    <p className="text-sm text-muted-foreground">Create, configure and control your bots</p>
                   </div>
                 </div>
                 <ChevronRight className="h-5 w-5 text-muted-foreground" />

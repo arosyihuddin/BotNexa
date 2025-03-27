@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { EyeIcon, ArrowLeft, EyeOffIcon, LockIcon, MailIcon, UserIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PageTransition } from "@/lib/animations";
+import { UserService } from "@/services/user.service";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -35,8 +36,12 @@ const Register = () => {
     setIsLoading(true);
     
     try {
-      // Simulate API request
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Register with Supabase and API
+      await UserService.registerUser({
+        email,
+        password,
+        fullName: name
+      });
       
       // Redirect to dashboard on successful registration
       navigate("/dashboard");
@@ -46,6 +51,7 @@ const Register = () => {
         description: "Your account has been created successfully.",
       });
     } catch (error) {
+      console.error("Registration error:", error);
       toast({
         title: "Registration failed",
         description: "There was an error creating your account. Please try again.",

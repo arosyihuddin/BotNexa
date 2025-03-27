@@ -26,7 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -104,6 +104,7 @@ const Conversations = () => {
     messageId: string;
   } | null>(null);
   const [replyToMessage, setReplyToMessage] = useState<string | null>(null);
+  const [activeActionType, setActiveActionType] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -478,24 +479,17 @@ const Conversations = () => {
   const isMobile = useIsMobile();
   const location = useLocation();
 
-  // Sort chats with pinned ones at the top
   const sortedChats = [...mockChats].sort((a, b) => {
-    // First sort by pinned status
     if (a.isPinned && !b.isPinned) return -1;
     if (!a.isPinned && b.isPinned) return 1;
-
-    // Then sort by time (assuming we would parse the time strings)
-    // This is a simplified version just for demonstration
     return a.time > b.time ? -1 : 1;
   });
 
   const filteredChats = sortedChats.filter((chat) => {
-    // Apply search filter
     const matchesSearch = chat.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
 
-    // Apply tab filter
     if (filterTab === "all") return matchesSearch && !chat.isArchived;
     if (filterTab === "unread")
       return matchesSearch && chat.unread > 0 && !chat.isArchived;
@@ -513,14 +507,12 @@ const Conversations = () => {
   }, [location]);
 
   useEffect(() => {
-    // Scroll to bottom of messages when a chat is selected or messages change
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [selectedChat, mockChats]);
 
   useEffect(() => {
-    // Close context menu when clicking outside
     const handleClickOutside = () => {
       setContextMenuPosition(null);
       setMessageMenuPosition(null);
@@ -547,7 +539,6 @@ const Conversations = () => {
           status: "sent" as const,
         };
 
-        // Add reply information if replying to a message
         if (replyToMessage) {
           const repliedMessage = chat.messages.find(
             (m) => m.id === replyToMessage
@@ -557,7 +548,6 @@ const Conversations = () => {
           }
         }
 
-        // Update the chat with new message
         return {
           ...chat,
           lastMessage: messageInput,
@@ -568,20 +558,16 @@ const Conversations = () => {
       return chat;
     });
 
-    // Re-sort the list to move the chat with the new message to the top (but below pinned chats)
     const chatToMove = updatedChats.find((c) => c.id === selectedChat);
     if (chatToMove) {
       const otherChats = updatedChats.filter((c) => c.id !== selectedChat);
 
-      // Separate pinned and unpinned chats
       const pinnedChats = otherChats.filter((c) => c.isPinned);
       const unpinnedChats = otherChats.filter((c) => !c.isPinned);
 
-      // If the chat we're moving is pinned, keep it with pinned chats
       if (chatToMove.isPinned) {
         setMockChats([...pinnedChats, chatToMove, ...unpinnedChats]);
       } else {
-        // Otherwise, put it at the top of unpinned chats
         setMockChats([...pinnedChats, chatToMove, ...unpinnedChats]);
       }
     } else {
@@ -589,13 +575,12 @@ const Conversations = () => {
     }
 
     setMessageInput("");
-    setReplyToMessage(null); // Clear reply after sending
+    setReplyToMessage(null);
   };
 
   const handleChatSelect = (chatId: string) => {
     setSelectedChat(chatId);
 
-    // Mark as read when selected
     setMockChats((prev) =>
       prev.map((chat) => (chat.id === chatId ? { ...chat, unread: 0 } : chat))
     );
@@ -645,10 +630,8 @@ const Conversations = () => {
             case "favorite":
               return { ...chat, isFavorite: !chat.isFavorite };
             case "delete":
-              // Remove the chat
               return { ...chat };
             case "leaveGroup":
-              // In a real app, this would involve an API call
               console.log("Leave group:", chatId);
               return chat;
             default:
@@ -659,7 +642,6 @@ const Conversations = () => {
       })
     );
 
-    // For delete action, remove the chat from the list
     if (action === "delete") {
       setMockChats((prev) => prev.filter((chat) => chat.id !== chatId));
       if (selectedChat === chatId) {
@@ -675,7 +657,6 @@ const Conversations = () => {
 
     const { chatId, messageId } = messageMenuPosition;
 
-    // Implement message actions
     switch (action) {
       case "reply":
         setReplyToMessage(messageId);
@@ -714,7 +695,6 @@ const Conversations = () => {
   const handleForwardMessage = (targetChatId: string) => {
     if (!forwardMessageId || !selectedChat) return;
 
-    // Find the message to forward
     const sourceChat = mockChats.find((c) => c.id === selectedChat);
     const messageToForward = sourceChat?.messages.find(
       (m) => m.id === forwardMessageId
@@ -722,7 +702,6 @@ const Conversations = () => {
 
     if (!messageToForward) return;
 
-    // Create a new forwarded message
     const forwardedMessage: Message = {
       id: `${targetChatId}-forward-${Date.now()}`,
       content: messageToForward.content,
@@ -735,7 +714,6 @@ const Conversations = () => {
       forwarded: true,
     };
 
-    // Add the message to the target chat
     setMockChats((prev) =>
       prev.map((chat) => {
         if (chat.id === targetChatId) {
@@ -770,6 +748,39 @@ const Conversations = () => {
     return chat?.messages.find((m) => m.id === messageId);
   };
 
+  const handleHeaderAction = (action: string) => {
+    if (!selectedChat) return;
+    
+    switch (action) {
+      case "viewContact":
+        setShowContactModal(true);
+        break;
+      case "archive":
+        handleContextMenuAction("archive");
+        break;
+      case "mute":
+        handleContextMenuAction("mute");
+        break;
+      case "pin":
+        handleContextMenuAction("pin");
+        break;
+      case "markUnread":
+        handleContextMenuAction("markUnread");
+        break;
+      case "favorite":
+        handleContextMenuAction("favorite");
+        break;
+      case "delete":
+        handleContextMenuAction("delete");
+        break;
+      case "leaveGroup":
+        handleContextMenuAction("leaveGroup");
+        break;
+      default:
+        break;
+    }
+  };
+
   const selectedChatData = mockChats.find((c) => c.id === selectedChat);
 
   return (
@@ -779,7 +790,6 @@ const Conversations = () => {
           isMobile ? "grid-cols-1" : "md:grid-cols-[350px_1fr]"
         } gap-4 h-[calc(100vh-8rem)]`}
       >
-        {/* Conversations List - Sembunyikan di mobile ketika chat dipilih */}
         {(!isMobile || !selectedChat) && (
           <div className="border rounded-lg overflow-hidden flex flex-col">
             <div className="p-3 border-b">
@@ -913,21 +923,24 @@ const Conversations = () => {
           </div>
         )}
 
-        {/* Chat Content */}
         {selectedChat ? (
           <Card className="flex flex-col h-full">
-            {/* Chat Header */}
             <div
-              className="p-3 border-b flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors"
-              onClick={() => setShowContactModal(true)}
+              className="p-3 border-b flex items-center justify-between"
             >
-              <div className="flex items-center gap-2">
+              <div 
+                className="flex items-center gap-2 cursor-pointer hover:bg-muted/30 transition-colors px-2 py-1 rounded"
+                onClick={() => setShowContactModal(true)}
+              >
                 {isMobile && (
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     className="md:hidden"
-                    onClick={() => setSelectedChat(null)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedChat(null);
+                    }}
                   >
                     <ArrowLeft className="h-5 w-5" />
                   </Button>
@@ -960,39 +973,29 @@ const Conversations = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setShowContactModal(true)}>
+                    <DropdownMenuItem onClick={() => handleHeaderAction("viewContact")}>
                       View Contact
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleContextMenuAction("archive")}
-                    >
+                    <DropdownMenuItem onClick={() => handleHeaderAction("archive")}>
                       {selectedChatData?.isArchived ? "Unarchive" : "Archive"}
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleContextMenuAction("mute")}
-                    >
+                    <DropdownMenuItem onClick={() => handleHeaderAction("mute")}>
                       {selectedChatData?.isMuted ? "Unmute" : "Mute"}
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleContextMenuAction("pin")}
-                    >
+                    <DropdownMenuItem onClick={() => handleHeaderAction("pin")}>
                       {selectedChatData?.isPinned ? "Unpin" : "Pin"}
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleContextMenuAction("markUnread")}
-                    >
+                    <DropdownMenuItem onClick={() => handleHeaderAction("markUnread")}>
                       Mark as unread
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleContextMenuAction("favorite")}
-                    >
+                    <DropdownMenuItem onClick={() => handleHeaderAction("favorite")}>
                       {selectedChatData?.isFavorite
                         ? "Remove from favorites"
                         : "Add to favorites"}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() => handleContextMenuAction("delete")}
+                      onClick={() => handleHeaderAction("delete")}
                       className="text-destructive"
                     >
                       Delete chat
@@ -1000,7 +1003,7 @@ const Conversations = () => {
                     {selectedChatData?.isGroup && (
                       <DropdownMenuItem
                         className="text-destructive"
-                        onClick={() => handleContextMenuAction("leaveGroup")}
+                        onClick={() => handleHeaderAction("leaveGroup")}
                       >
                         Leave Group
                       </DropdownMenuItem>
@@ -1010,7 +1013,6 @@ const Conversations = () => {
               </div>
             </div>
 
-            {/* Chat Messages */}
             <CardContent className="flex-1 p-4 overflow-y-auto space-y-4">
               {selectedChatData?.messages.map((message) => {
                 const repliedMessage = message.replyTo
@@ -1066,7 +1068,6 @@ const Conversations = () => {
                           </p>
                         )}
 
-                      {/* Reply information */}
                       {repliedMessage && (
                         <div
                           className={`rounded p-2 mb-2 text-sm ${
@@ -1085,7 +1086,6 @@ const Conversations = () => {
                         </div>
                       )}
 
-                      {/* Forwarded indicator */}
                       {message.forwarded && message.sender === "contact" && (
                         <p className="text-xs italic mb-1 text-muted-foreground">
                           Forwarded
@@ -1120,7 +1120,6 @@ const Conversations = () => {
                         )}
                       </div>
 
-                      {/* Hover menu button */}
                       <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button
                           size="icon"
@@ -1145,7 +1144,6 @@ const Conversations = () => {
               <div ref={messagesEndRef} />
             </CardContent>
 
-            {/* Message Input */}
             <div className="p-3 border-t">
               <div className="flex items-center gap-2 mb-2 md:hidden">
                 <Button variant="ghost" size="icon">
@@ -1158,7 +1156,6 @@ const Conversations = () => {
                   <Archive className="h-5 w-5" />
                 </Button>
               </div>
-              {/* Reply preview */}
               {replyToMessage && (
                 <div className="mb-2 p-2 bg-muted/30 rounded-lg border-l-2 border-botnexa-500 flex justify-between items-center">
                   <div className="flex-1 overflow-hidden">
@@ -1208,32 +1205,31 @@ const Conversations = () => {
           </Card>
         ) : (
             !isMobile && (
-          <Card className="flex items-center justify-center h-full">
-            <div className="text-center p-6">
-              <div className="mx-auto bg-muted/50 rounded-full w-12 h-12 flex items-center justify-center mb-3">
-                <MessageSquare className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-medium mb-1">
-                No Conversation Selected
-              </h3>
-              <p className="text-muted-foreground text-sm max-w-sm">
-                Select a conversation from the list to view messages or start a
-                new conversation.
-              </p>
-              <Button
-                className="mt-4 bg-botnexa-500 hover:bg-botnexa-600"
-                onClick={() => setShowNewChatModal(true)}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                New Conversation
-              </Button>
-            </div>
+              <Card className="flex items-center justify-center h-full">
+                <div className="text-center p-6">
+                  <div className="mx-auto bg-muted/50 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                    <MessageSquare className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium mb-1">
+                    No Conversation Selected
+                  </h3>
+                  <p className="text-muted-foreground text-sm max-w-sm">
+                    Select a conversation from the list to view messages or start a
+                    new conversation.
+                  </p>
+                  <Button
+                    className="mt-4 bg-botnexa-500 hover:bg-botnexa-600"
+                    onClick={() => setShowNewChatModal(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Conversation
+                  </Button>
+                </div>
               </Card>
             )
         )}
       </div>
 
-       {/* Floating button untuk new chat di mobile */}
       {isMobile && !selectedChat && (
         <div className="fixed bottom-4 right-4 z-50">
           <Button 
@@ -1246,14 +1242,12 @@ const Conversations = () => {
         </div>
       )}
 
-      {/* Context Menu */}
       {contextMenuPosition && (
         <div
           className="fixed bg-popover text-popover-foreground rounded-md shadow-md border border-border p-1 z-50"
           style={{
             top: contextMenuPosition.y,
             left: contextMenuPosition.x,
-            transform: isMobile ? 'translate(-50%, -50%)' : 'none'
           }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -1333,7 +1327,6 @@ const Conversations = () => {
         </div>
       )}
 
-      {/* Message Context Menu */}
       {messageMenuPosition && (
         <div
           className="fixed bg-popover text-popover-foreground rounded-md shadow-md border border-border p-1 z-50"
@@ -1376,14 +1369,13 @@ const Conversations = () => {
         </div>
       )}
 
-      {/* New Chat Modal */}
       <Dialog open={showNewChatModal} onOpenChange={setShowNewChatModal}>
         <DialogContent className="max-w-md w-[calc(100%-1rem)] mx-2 rounded-lg">
           <DialogHeader>
             <DialogTitle>New Conversation</DialogTitle>
-              <DialogDescription>
-                Select a contact to start a new conversation
-              </DialogDescription>
+            <DialogDescription>
+              Select a contact to start a new conversation
+            </DialogDescription>
           </DialogHeader>
           <div className="relative mb-4">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -1395,14 +1387,12 @@ const Conversations = () => {
                 key={contact.id}
                 className="flex items-center gap-3 w-full p-2 rounded-md hover:bg-muted/50 text-left"
                 onClick={() => {
-                  // Check if chat already exists
                   const existingChat = mockChats.find(
                     (chat) => !chat.isGroup && chat.name === contact.name
                   );
                   if (existingChat) {
                     setSelectedChat(existingChat.id);
                   } else {
-                    // Create new chat
                     const newChat: Chat = {
                       id: `new-${Date.now()}`,
                       name: contact.name,
@@ -1437,7 +1427,6 @@ const Conversations = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Forward Message Modal */}
       <Dialog open={showForwardModal} onOpenChange={setShowForwardModal}>
         <DialogContent className="max-w-md w-[calc(100%-1rem)] mx-2 rounded-lg">
           <DialogHeader>
@@ -1446,7 +1435,7 @@ const Conversations = () => {
               <DialogDescription>
                 Select contacts to forward this message to
               </DialogDescription>
-              </VisuallyHidden>
+            </VisuallyHidden>
           </DialogHeader>
           <div className="relative mb-4">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -1477,8 +1466,14 @@ const Conversations = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Contact Detail Modal */}
-      <Dialog open={showContactModal} onOpenChange={setShowContactModal}>
+      <Dialog 
+        open={showContactModal} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowContactModal(false);
+          }
+        }}
+      >
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Contact Information</DialogTitle>

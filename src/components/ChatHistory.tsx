@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 
 interface Message {
   id: string;
@@ -13,9 +12,10 @@ interface Message {
 
 interface ChatHistoryProps {
   className?: string;
+  contactName?: string; // Added contactName prop
 }
 
-const ChatHistory = ({ className }: ChatHistoryProps) => {
+const ChatHistory = ({ className, contactName }: ChatHistoryProps) => {
   // Mock data - in a real app, this would come from your API
   const [conversations] = useState<Message[]>([
     {
@@ -64,12 +64,14 @@ const ChatHistory = ({ className }: ChatHistoryProps) => {
     <div className={cn("rounded-lg border bg-card text-card-foreground shadow-sm", className)}>
       <div className="p-4 border-b">
         <h3 className="text-lg font-semibold">Conversation History</h3>
-        <p className="text-sm text-muted-foreground">Recent interactions with your bot</p>
+        <p className="text-sm text-muted-foreground">
+          {contactName ? `Recent interactions with ${contactName}` : "Recent interactions with your bot"}
+        </p>
       </div>
       
       <ScrollArea className="h-[400px]">
         <div className="p-4 space-y-4">
-          {conversations.map((message, index) => (
+          {conversations.map((message) => (
             <div key={message.id} className={cn(
               "flex gap-3",
               message.sender === "bot" ? "justify-start" : "justify-end"

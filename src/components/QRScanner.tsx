@@ -1,178 +1,136 @@
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScanLine, QrCode, RefreshCw } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { WhatsAppService } from "@/services/whatsapp.service";
+import { UserService } from "@/services/user.service";
 
-const QRScanner = () => {
-  const [pairingCode, setPairingCode] = useState("");
-  const [isScanning, setIsScanning] = useState(false);
-  const [qrRefreshCounter, setQrRefreshCounter] = useState(0);
-  const [generatedPairingCode, setGeneratedPairingCode] = useState("");
-  const [showGeneratedCode, setShowGeneratedCode] = useState(false);
-  const isMobile = useIsMobile();
+interface QRScannerProps {
+  botId: string;
+  onScanComplete?: () => void;
+  onConnected?: () => void;
+}
 
-  // Simulate QR code refresh
+const QRScanner = ({ botId, onScanComplete, onConnected }: QRScannerProps) => {
+  const [isActive, setIsActive] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (isScanning) {
-        setQrRefreshCounter((prev) => prev + 1);
+    // Check if bot is already connected
+    const checkBotStatus = async () => {
+      try {
+        const bot = await UserService.toggleBotStatus(botId, false);
+        setIsConnected(bot.isConnected);
+        setIsActive(bot.status === 'online');
+      } catch (error) {
+        console.error("Error checking bot status:", error);
       }
-    }, 20000); // Refresh every 20 seconds
+    };
 
-    return () => clearTimeout(timer);
-  }, [isScanning, qrRefreshCounter]);
+    checkBotStatus();
+  }, [botId]);
 
-  const handlePairingSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Pairing with code:", pairingCode);
-    // Generate a random 8-digit code
-    const randomCode = Math.floor(10000000 + Math.random() * 90000000).toString();
-    setGeneratedPairingCode(randomCode);
-    setShowGeneratedCode(true);
+  const toggleBot = async () => {
+    setIsLoading(true);
+    try {
+      const newStatus = !isActive;
+      const updatedBot = await UserService.toggleBotStatus(botId, newStatus);
+      
+      setIsActive(updatedBot.status === 'online');
+      
+      if (newStatus) {
+        // If turning on, start WhatsApp connection
+        const qrCodeData = await WhatsAppService.connect(botId);
+        if (qrCodeData) {
+          setQrCode(qrCodeData);
+          WhatsAppService.listenForConnection(botId, (connected) => {
+            setIsConnected(connected);
+            setQrCode(null);
+            if (connected) {
+              if (onScanComplete) onScanComplete();
+              if (onConnected) onConnected();
+            }
+          });
+        }
+      } else {
+        // If turning off, disconnect WhatsApp
+        await WhatsAppService.disconnect(botId);
+        setQrCode(null);
+        setIsConnected(false);
+      }
+      
+      toast({
+        title: newStatus ? "Bot Activated" : "Bot Deactivated",
+        description: newStatus 
+          ? "Scan the QR code to connect WhatsApp" 
+          : "Bot has been turned off successfully",
+      });
+    } catch (error) {
+      console.error("Error toggling bot:", error);
+      toast({
+        title: "Error",
+        description: "Failed to toggle bot status",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  const refreshQRCode = () => {
-    setQrRefreshCounter((prev) => prev + 1);
-  };
-
-  const qrSize = isMobile ? "w-full max-w-[250px]" : "w-64";
 
   return (
-    <Card className="w-full max-w-md mx-auto overflow-hidden">
-      <Tabs defaultValue="scan" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger 
-            value="scan" 
-            onClick={() => {
-              setIsScanning(true);
-              setShowGeneratedCode(false);
-            }}
+    <Card className="p-6 flex flex-col items-center">
+      <div className="w-full mb-4">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-lg font-medium">Bot Connection</h3>
+          <Button 
+            variant={isActive ? "destructive" : "default"}
+            size="sm" 
+            onClick={toggleBot}
+            disabled={isLoading}
           >
-            Scan QR Code
-          </TabsTrigger>
-          <TabsTrigger 
-            value="pair" 
-            onClick={() => {
-              setIsScanning(false);
-              setShowGeneratedCode(false);
-            }}
-          >
-            Pairing Code
-          </TabsTrigger>
-        </TabsList>
+            {isLoading ? "Processing..." : isActive ? "Turn Off" : "Turn On"}
+          </Button>
+        </div>
         
-        <TabsContent value="scan" className="p-4 sm:p-6">
-          <div className="text-center space-y-4">
-            <div className="text-lg font-medium">Scan the QR code with WhatsApp</div>
-            <p className="text-sm text-muted-foreground pb-2">
-              Open WhatsApp on your phone, tap Menu or Settings and select WhatsApp Web
-            </p>
-            
-            <div className="relative mx-auto flex items-center justify-center">
-              {/* QR Code with responsive size */}
-              <div className={`${qrSize} h-auto aspect-square p-4 border-2 border-botnexa-500 rounded-lg relative`}>
-                <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=botnexa-connect-${qrRefreshCounter}`} 
-                  alt="WhatsApp QR Code"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              
-              {/* Style for the scanning animation - Fixed with proper syntax */}
-              <style>
-                {`
-                  @keyframes scan {
-                    0% { transform: translateY(0); }
-                    50% { transform: translateY(100%); }
-                    100% { transform: translateY(0); }
-                  }
-                  .animate-scan {
-                    animation: scan 2s ease-in-out infinite;
-                  }
-                `}
-              </style>
+        {isActive && !isConnected && qrCode && (
+          <div className="flex flex-col items-center space-y-4">
+            <div className="bg-white p-4 rounded-md">
+              <img 
+                src={qrCode} 
+                alt="WhatsApp QR Code"
+                className="w-48 h-48 object-contain"
+              />
             </div>
-            
-            <div className="flex justify-center pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1"
-                onClick={refreshQRCode}
-              >
-                <RefreshCw className="h-4 w-4" />
-                Refresh QR
-              </Button>
-            </div>
-            
-            <p className="text-xs text-muted-foreground pt-2">
-              QR code will refresh automatically every 20 seconds
+            <p className="text-sm text-center text-muted-foreground">
+              Scan this QR code with WhatsApp on your phone to connect
             </p>
           </div>
-        </TabsContent>
+        )}
         
-        <TabsContent value="pair" className="p-4 sm:p-6">
-          <div className="text-center space-y-4">
-            <div className="text-lg font-medium">Connect with pairing code</div>
-            
-            {showGeneratedCode ? (
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground pb-2">
-                  Enter this 8-digit code in your WhatsApp:
-                </p>
-                <div className="text-3xl font-mono tracking-wider bg-muted p-4 rounded-lg">
-                  {generatedPairingCode}
-                </div>
-                <p className="text-sm text-muted-foreground pb-2">
-                  This code will expire in 5 minutes
-                </p>
-                <Button 
-                  onClick={() => setShowGeneratedCode(false)}
-                  variant="outline"
-                  className="mt-2"
-                >
-                  Generate New Code
-                </Button>
-              </div>
-            ) : (
-              <>
-                <p className="text-sm text-muted-foreground pb-2">
-                  1. Open WhatsApp on your phone
-                  <br />
-                  2. Tap Menu or Settings and select Linked Devices
-                  <br />
-                  3. Tap on "Link a Device"
-                </p>
-                
-                <form onSubmit={handlePairingSubmit} className="space-y-4">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-full">
-                      <Input
-                        type="number"
-                        placeholder="Enter your phone number"
-                        value={pairingCode}
-                        onChange={(e) => setPairingCode(e.target.value)}
-                        className="text-center"
-                      />
-                    </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-botnexa-500 hover:bg-botnexa-600"
-                      disabled={!pairingCode.trim()}
-                    >
-                      Generate Pairing Code
-                    </Button>
-                  </div>
-                </form>
-              </>
-            )}
+        {isActive && isConnected && (
+          <div className="text-center p-4">
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 mb-2">
+              <span className="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
+              <span className="text-sm font-medium">Connected</span>
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">
+              Your WhatsApp is connected and bot is active
+            </p>
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+        
+        {!isActive && (
+          <div className="text-center p-4">
+            <p className="text-sm text-muted-foreground">
+              Bot is currently turned off. Turn it on to connect WhatsApp.
+            </p>
+          </div>
+        )}
+      </div>
     </Card>
   );
 };

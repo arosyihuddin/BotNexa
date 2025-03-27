@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -14,6 +13,9 @@ const Navbar = () => {
   const isActive = (path: string) => {
     if (path === '/') {
       return location.pathname === '/';
+    }
+    if (path.startsWith('#')) {
+      return location.hash === path;
     }
     return location.pathname.includes(path);
   };
@@ -70,10 +72,10 @@ const Navbar = () => {
             <NavLink to="/" active={isActive("/")} onClick={() => {}}>
               Home
             </NavLink>
-            <NavLink to="/#features" active={location.hash === "#features"} onClick={() => scrollToSection('features')}>
+            <NavLink to="#features" active={location.hash === "#features"} onClick={() => scrollToSection('features')}>
               Features
             </NavLink>
-            <NavLink to="/#pricing" active={location.hash === "#pricing"} onClick={() => scrollToSection('pricing')}>
+            <NavLink to="#pricing" active={location.hash === "#pricing"} onClick={() => scrollToSection('pricing')}>
               Pricing
             </NavLink>
             <div className="ml-4 flex items-center gap-3">
@@ -122,10 +124,10 @@ const Navbar = () => {
           <MobileNavLink to="/" active={isActive("/")} onClick={() => {}}>
             Home
           </MobileNavLink>
-          <MobileNavLink to="/#features" active={location.hash === "#features"} onClick={() => scrollToSection('features')}>
+          <MobileNavLink to="#features" active={location.hash === "#features"} onClick={() => scrollToSection('features')}>
             Features
           </MobileNavLink>
-          <MobileNavLink to="/#pricing" active={location.hash === "#pricing"} onClick={() => scrollToSection('pricing')}>
+          <MobileNavLink to="#pricing" active={location.hash === "#pricing"} onClick={() => scrollToSection('pricing')}>
             Pricing
           </MobileNavLink>
           <div className="grid grid-cols-2 gap-3 mt-3">

@@ -1,9 +1,11 @@
+
 import { CheckCircle2, MessageCircle, BrainCircuit, Calendar } from "lucide-react";
+
 const Features = () => {
   return <section id="features" className="py-16 md:py-24">
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="heading-lg mb-4 text-white">
+          <h2 className="heading-lg mb-4">
             Powerful Features for WhatsApp Bot Management
           </h2>
           <p className="text-lg text-muted-foreground">
@@ -65,11 +67,13 @@ const Features = () => {
       </div>
     </section>;
 };
+
 interface FeatureItemProps {
   icon: React.ReactNode;
   title: string;
   description: string;
 }
+
 const FeatureItem = ({
   icon,
   title,
@@ -81,10 +85,11 @@ const FeatureItem = ({
       </div>
     </div>
     <div>
-      <h3 className="text-xl font-semibold mb-2 text-white">{title}</h3>
+      <h3 className="text-xl font-semibold mb-2">{title}</h3>
       <p className="text-muted-foreground">{description}</p>
     </div>
   </div>;
+
 const FeatureListItem = ({
   children
 }: {
@@ -93,4 +98,5 @@ const FeatureListItem = ({
     <CheckCircle2 className="h-5 w-5 text-botnexa-500 flex-shrink-0 mt-0.5" />
     <span className="text-foreground">{children}</span>
   </li>;
+
 export default Features;
