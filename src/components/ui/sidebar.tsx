@@ -1,9 +1,8 @@
-
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { X, Menu, ChevronRight, ChevronLeft } from "lucide-react";
+import { X, ChevronLeft } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -17,11 +16,9 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
     icon?: React.ReactNode;
     onClick?: () => void;
     active?: boolean;
-    showTitle?: boolean;
     disabled?: boolean;
-    external?: boolean;
-    label?: string;
     customContent?: React.ReactNode;
+    label?: string; // Added label property
   }[];
   footer?: React.ReactNode;
   setActivePath?: (path: string) => void;
@@ -98,7 +95,6 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
 
     return (
       <>
-        {/* Sidebar */}
         <div
           ref={sidebarRef}
           className={cn(
@@ -110,15 +106,14 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                 : "-translate-x-full w-0"
               : showOpen
                 ? "w-64"
-                : "md:w-16 hover:md:w-64",
-            // : "w-[4.5rem] hover:w-64",
+                : "md:w-16",
             className
           )}
           {...props}
         >
           <div className="flex h-14 items-center border-b px-4">
             <div className="flex-1">
-              {header || <div className="font-medium">Sidebar Header</div>}
+              {showOpen && (header || <div className="font-medium">Sidebar Header</div>)}
             </div>
             <Button
               variant="outline"
@@ -130,9 +125,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                 <X className="h-4 w-4" />
               ) : showOpen ? (
                 <ChevronLeft className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
+              ) : null}
               <span className="sr-only">
                 {showOpen ? "Close Menu" : "Open Menu"}
               </span>
@@ -142,7 +135,6 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
           <nav className="flex-1 overflow-auto p-2">
             <ul className="grid gap-1">
               {items.map((item, index) => {
-                // Set the active state based on the current route
                 const isActive = item.href
                   ? location.pathname === item.href
                   : item.active;
@@ -153,7 +145,8 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                       <Button
                         variant={isActive ? "secondary" : "ghost"}
                         className={cn(
-                          "w-full justify-start",
+                          "w-full",
+                          !showOpen ? "justify-center px-2" : "justify-start",
                           isActive ? "bg-accent" : "",
                           item.disabled && "pointer-events-none opacity-50"
                         )}
@@ -171,12 +164,14 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                           }
                         }}
                       >
-                        {item.icon && (
-                          <span className="mr-2">{item.icon}</span>
-                        )}
-                        {item.title}
-                        {item.label && (
-                          <span className="ml-auto">{item.label}</span>
+                        {item.icon}
+                        {showOpen && (
+                          <>
+                            <span className="ml-2">{item.title}</span>
+                            {item.label && (
+                              <span className="ml-auto">{item.label}</span>
+                            )}
+                          </>
                         )}
                       </Button>
                     )}

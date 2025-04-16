@@ -73,12 +73,6 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
       <div className="min-h-screen bg-background flex flex-col">
         <div className="flex min-h-screen w-full">
           {/* Sidebar */}
-          {/* <div className="flex min-h-screen w-full"> */}
-          {/* <div className={cn(
-            "fixed md:relative z-30 h-screen bg-background border-r border-border transition-all duration-300",
-            isSidebarOpen ? "w-64 translate-x-0" :
-              "-translate-x-full md:translate-x-0 md:w-[4.5rem] hover:md:w-64"
-          )}> */}
           <Sidebar
             // className="h-full flex flex-col overflow-y-auto"
             className={cn(
@@ -191,12 +185,8 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
               </div>
             }
           />
-          {/* </div> */}
 
           {/* Main Content */}
-          {/* <div className={cn(
-            "flex-1 flex flex-col min-h-0 transition-all duration-300",
-          )}> */}
           <div className={cn(
             "flex-1 flex flex-col min-h-0 transition-all duration-300",
             isSidebarOpen ? "md:ml-64" : "md:ml-[4.5rem]"
