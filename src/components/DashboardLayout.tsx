@@ -1,7 +1,7 @@
 import { ReactNode, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { 
-  Home, BarChart3, Settings, Users, MessageSquare, Calendar, Bell, 
+import {
+  Home, BarChart3, Settings, Users, MessageSquare, Calendar, Bell,
   LogOut, Search, Menu, X, Activity, Bot
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
   const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   const { toast } = useToast();
-  
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -37,7 +37,7 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
         setIsSidebarOpen(false);
       }
     };
-    
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -59,7 +59,7 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
       });
     }
   };
-  
+
   const handleBack = () => {
     if (onBack) {
       onBack();
@@ -73,15 +73,10 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
       <div className="min-h-screen bg-background flex flex-col">
         <div className="flex min-h-screen w-full">
           {/* Sidebar */}
-          {/* <div className={cn(
-            "fixed md:relative z-30 h-screen bg-background border-r border-border transition-all duration-300",
-            isSidebarOpen ? "w-64 translate-x-0" : 
-            "-translate-x-full md:translate-x-0 md:w-[4.5rem] hover:md:w-64"
-          )}> */}
           <div className={cn(
             "fixed md:relative z-30 h-screen bg-background border-r border-border transition-all duration-300",
-            isSidebarOpen ? "w-64 translate-x-0" : 
-            "-translate-x-full md:translate-x-0 md:w-[4.5rem] hover:md:w-64"
+            isSidebarOpen ? "w-64 translate-x-0" :
+              "-translate-x-full md:translate-x-0 md:w-[4.5rem] hover:md:w-64"
           )}>
             <Sidebar
               className="h-full flex flex-col overflow-y-auto"
@@ -101,14 +96,6 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
                       BotNexa
                     </span>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => setIsSidebarOpen(false)}
-                    className="md:hidden"
-                  >
-                    <X className="h-5 w-5" />
-                  </Button>
                 </div>
               }
               items={[
@@ -188,9 +175,9 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
                     <p className="text-sm font-medium truncate">John Doe</p>
                     <p className="text-xs text-muted-foreground truncate">john@example.com</p>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={handleLogout}
                     className={cn(!isSidebarOpen && "md:hidden md:hover:block")}
                   >
@@ -202,63 +189,57 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
           </div>
 
           {/* Main Content */}
-          {/* <div className={cn(
-            "flex-1 flex flex-col min-h-0 transition-all duration-300",
-            // isSidebarOpen ? "md:ml-64" : "md:ml-[4.5rem]"
-          )}> */}
           <div className={cn(
             "flex-1 flex flex-col min-h-0 transition-all duration-300",
-            isSidebarOpen ? "md:ml-64" : "md:ml-[4.5rem]"
           )}>
             <header className={cn(
-              "h-14 border-b border-border flex items-center justify-between px-4 sticky top-0 bg-background/95 backdrop-blur-sm z-20",
-              isSidebarOpen ? "md:pl-9" : "md:pl-8"
+              "h-14 border-b border-border flex items-center justify-between px-7 sticky top-0 bg-background/95 backdrop-blur-sm z-20"
             )}>
               <div className="flex items-center gap-4">
                 {isMobile && (
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
+                  <Button
+                    variant="outline"
+                    size="icon"
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                     className="md:hidden"
                   >
                     <Menu className="h-5 w-5" />
                   </Button>
                 )}
-                
+
                 {showBackButton && (
                   <Button variant="ghost" size="icon" onClick={handleBack}>
                     <X className="h-5 w-5" />
                   </Button>
                 )}
-                
+
                 <h1 className="text-xl font-semibold">{title}</h1>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <div className="relative hidden md:block">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    type="search" 
-                    placeholder="Search..." 
+                  <Input
+                    type="search"
+                    placeholder="Search..."
                     className="w-[200px] pl-8 bg-background focus-visible:ring-botnexa-500"
                   />
                 </div>
-                
+
                 <ThemeToggle />
-                
+
                 <Button variant="ghost" size="icon" className="relative">
                   <Bell className="h-5 w-5" />
                   <span className="absolute top-1 right-1 w-2 h-2 bg-botnexa-500 rounded-full"></span>
                 </Button>
-                
+
                 <Avatar className="h-8 w-8 hidden sm:flex">
                   <AvatarImage src="https://github.com/shadcn.png" alt="User" />
                   <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
               </div>
             </header>
-            
+
             <main className="flex-1 overflow-auto p-4 md:p-6 w-full">
               <div className="max-w-[calc(100vw-2rem)] md:max-w-[calc(100vw-4.5rem)]">
                 {children}
@@ -267,7 +248,7 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
           </div>
         </div>
       </div>
-    </PageTransition>
+    </PageTransition >
   );
 };
 

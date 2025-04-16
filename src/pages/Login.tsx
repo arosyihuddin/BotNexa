@@ -23,14 +23,14 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       // Login with Supabase and API
       await UserService.loginUser(email, password);
-      
+
       // Redirect to dashboard on successful login
       navigate("/dashboard");
-      
+
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
@@ -48,7 +48,7 @@ const Login = () => {
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
-    
+
     try {
       // Sign in with Google popup
       const { error } = await supabase.auth.signInWithOAuth({
@@ -57,10 +57,13 @@ const Login = () => {
           redirectTo: window.location.origin + '/dashboard'
         }
       });
-      
+
       if (error) throw error;
-      
+
       // The redirect will happen automatically
+      const { data: { user } } = await supabase.auth.getUser()
+      console.log("user", user);
+
       toast({
         title: "Redirecting to Google",
         description: "Please complete the sign-in process.",
@@ -85,7 +88,7 @@ const Login = () => {
             Back to home
           </Link>
         </header>
-        
+
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="w-full max-w-md mx-auto">
             <div className="text-center mb-8">
@@ -94,7 +97,7 @@ const Login = () => {
                 Sign in to your account to continue
               </p>
             </div>
-            
+
             <Card className="p-6 bg-white/70 dark:bg-card/50 backdrop-blur-sm border-border/50 animate-scale-in">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
@@ -113,12 +116,12 @@ const Login = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">Password</Label>
-                    <Link 
-                      to="/forgot-password" 
+                    <Link
+                      to="/forgot-password"
                       className="text-sm text-botnexa-600 dark:text-botnexa-400 hover:text-botnexa-700 dark:hover:text-botnexa-300 transition-colors"
                     >
                       Forgot password?
@@ -145,7 +148,7 @@ const Login = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 <Button
                   type="submit"
                   className="w-full bg-botnexa-500 hover:bg-botnexa-600"
@@ -153,7 +156,7 @@ const Login = () => {
                 >
                   {isLoading ? "Signing in..." : "Sign in"}
                 </Button>
-                
+
                 <div className="relative flex items-center justify-center my-4">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-border"></div>
@@ -162,11 +165,11 @@ const Login = () => {
                     Or continue with
                   </div>
                 </div>
-                
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="w-full" 
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
                   onClick={handleGoogleSignIn}
                   disabled={isGoogleLoading}
                 >
@@ -197,7 +200,7 @@ const Login = () => {
                   )}
                 </Button>
               </form>
-              
+
               <div className="mt-6 text-center text-sm">
                 <span className="text-muted-foreground">Don't have an account?</span>{" "}
                 <Link
@@ -208,7 +211,7 @@ const Login = () => {
                 </Link>
               </div>
             </Card>
-            
+
             <div className="mt-8 text-center text-xs text-muted-foreground">
               <p>
                 By signing in, you agree to our{" "}

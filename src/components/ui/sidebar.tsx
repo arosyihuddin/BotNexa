@@ -85,45 +85,19 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
 
     return (
       <>
-        {isMobile && (
-          // Mobile Toggle Button
-          <Button
-            variant="outline"
-            size="icon"
-            className={cn("fixed left-4 top-4 z-40", 
-              showMobileOpen ? "hidden" : "block"
-            )}
-            onClick={toggleSidebar}
-          >
-            <Menu className="h-4 w-4" />
-            <span className="sr-only">Toggle Menu</span>
-          </Button>
-        )}
-        
-        {/* <div
-          ref={sidebarRef}
-          className={cn(
-            "fixed inset-y-0 left-0 z-30 flex w-[280px] flex-col border-r bg-background transition-transform duration-300 ease-in-out overflow-hidden",
-            isMobile
-              ? showMobileOpen
-                ? "translate-x-0"
-                : "-translate-x-full"
-              : showOpen
-              ? "translate-x-0 md:z-0"
-              : "-translate-x-full md:z-0",
-            className
-          )} */}
+        {/* Sidebar */}
         <div
           ref={sidebarRef}
           className={cn(
-            "fixed inset-y-0 left-0 z-30 flex w-[280px] flex-col border-r bg-background transition-transform duration-300 ease-in-out md:static md:transform-none",
+            "fixed inset-y-0 left-0 z-30 flex h-screen flex-col border-r bg-background",
+            "w-[280px] md:w-64 transition-[transform,width] duration-300 ease-in-out",
             isMobile
               ? showMobileOpen
                 ? "translate-x-0"
                 : "-translate-x-full"
               : showOpen
-              ? "translate-x-0 md:w-64"
-              : "md:w-[4.5rem] hover:md:w-64",
+                ? "w-64"
+                : "md:w-16 hover:md:w-64",
             className
           )}
           {...props}
@@ -150,15 +124,15 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
               </span>
             </Button>
           </div>
-          
+
           <nav className="flex-1 overflow-auto p-2">
             <ul className="grid gap-1">
               {items.map((item, index) => {
                 // Set the active state based on the current route
-                const isActive = item.href 
+                const isActive = item.href
                   ? location.pathname === item.href
                   : item.active;
-                
+
                 return (
                   <li key={index}>
                     {item.customContent || (
@@ -197,16 +171,11 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
               })}
             </ul>
           </nav>
-          
+
           {footer && <div className="border-t p-4">{footer}</div>}
         </div>
-        
-        {/* Overlay for mobile */}
         {isMobile && showMobileOpen && (
-          <div 
-            className="fixed inset-0 z-20 bg-black/50" 
-            onClick={toggleSidebar}
-          />
+          <div className="fixed inset-0 z-20 bg-black/50" />
         )}
       </>
     );
