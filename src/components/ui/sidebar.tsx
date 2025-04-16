@@ -53,6 +53,19 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
     const showOpen = isControlled ? isOpen : open;
     const showMobileOpen = isControlled ? isOpen : mobileOpen;
 
+    // Handle hover untuk desktop
+    const handleMouseEnter = () => {
+      if (!isMobile && isControlled && !showOpen) {
+        setIsOpen(true);
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (!isMobile && isControlled && showOpen) {
+        setIsOpen(false);
+      }
+    };
+
     // Handle click outside to close mobile sidebar
     React.useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
@@ -94,10 +107,11 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
             isMobile
               ? showMobileOpen
                 ? "translate-x-0"
-                : "-translate-x-full"
+                : "-translate-x-full w-0"
               : showOpen
                 ? "w-64"
                 : "md:w-16 hover:md:w-64",
+            // : "w-[4.5rem] hover:w-64",
             className
           )}
           {...props}
