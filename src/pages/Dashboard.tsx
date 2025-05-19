@@ -8,15 +8,19 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
+import {
   CheckCircle2, ChevronRight, BrainCircuit, Calendar, MessageSquare, Check, Bot, Plus
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import QRScanner from "@/components/QRScanner";
 import { PageTransition } from "@/lib/animations";
 import DashboardLayout from "@/components/DashboardLayout";
-import { UserService, UserBot } from "@/services/user.service";
+import { UserService } from "@/services/user.service";
 import { WhatsAppService } from "@/services/whatsapp.service";
+import { User } from "@/types/users.type";
+import { supabase } from "@/lib/supabase";
+import { create } from "domain";
+import { BotInfo } from "@/types/app-types";
 
 // Sample chat data - in a real app, this would come from an API
 const recentChats = [
@@ -143,31 +147,53 @@ const recentChats = [
 const Dashboard = () => {
   const navigate = useNavigate();
   const [isConnected, setIsConnected] = useState(false);
-  const [userBots, setUserBots] = useState<UserBot[]>([]);
+  const [userBots, setUserBots] = useState<BotInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+  const [userData, setUserData] = useState<User>()
+
   useEffect(() => {
     const loadBots = async () => {
       try {
         setIsLoading(true);
         const bots = await UserService.getUserBots();
         setUserBots(bots);
-        
-        // Check if any WhatsApp bot is connected
-        const whatsappBot = bots.find(bot => bot.type === 'whatsapp');
-        if (whatsappBot) {
-          setIsConnected(whatsappBot.isConnected);
-        }
+        // setIsConnected(bots[0].isConnected);
+
       } catch (error) {
         console.error("Error loading bots:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    
+
+    const getProfile = async () => {
+      const { data } = await supabase.auth.getUser();
+
+      const dataUser: User = {
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.user_metadata.display_name,
+        created_at: data.user.created_at,
+        updated_at: data.user.updated_at
+      }
+      setUserData(dataUser);
+
+    };
+
     loadBots();
+    getProfile();
   }, []);
-  
+
+  if (isLoading) {
+    return (
+      <DashboardLayout title="Dashboard" >
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin h-8 w-8 border-4 border-botnexa-500 border-t-transparent rounded-full"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout title="Dashboard">
       <PageTransition>
@@ -176,8 +202,9 @@ const Dashboard = () => {
           <div className="flex-1 flex flex-col min-h-0">
             {/* Content */}
             <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
-              {isConnected ? (
-                <ConnectedDashboard userBots={userBots} />
+              {userBots.length > 0 ? (
+                // {userBots.length > 0 ? (
+                <ConnectedDashboard userBots={userBots} userData={userData} />
               ) : (
                 <ConnectionSetup userBots={userBots} onConnect={() => setIsConnected(true)} />
               )}
@@ -190,14 +217,15 @@ const Dashboard = () => {
 };
 
 interface ConnectionSetupProps {
-  userBots: UserBot[];
+  userBots: BotInfo[];
   onConnect: () => void;
 }
 
 const ConnectionSetup = ({ userBots, onConnect }: ConnectionSetupProps) => {
   const navigate = useNavigate();
-  const whatsappBot = userBots.find(bot => bot.type === 'whatsapp');
-  
+  const whatsappBot = "";
+  // const whatsappBot = userBots.find(bot => bot.type === 'whatsapp');
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-6 md:mb-8">
@@ -206,7 +234,7 @@ const ConnectionSetup = ({ userBots, onConnect }: ConnectionSetupProps) => {
           To start using BotNexa, connect your WhatsApp account by scanning the QR code or entering a pairing code.
         </p>
       </div>
-      
+
       {whatsappBot ? (
         <QRScanner botId={whatsappBot.id} onConnected={onConnect} />
       ) : (
@@ -217,9 +245,9 @@ const ConnectionSetup = ({ userBots, onConnect }: ConnectionSetupProps) => {
             <p className="text-muted-foreground max-w-md mx-auto mb-4">
               You need to create a WhatsApp bot before you can connect to WhatsApp.
             </p>
-            <Button 
+            <Button
               className="bg-botnexa-500 hover:bg-botnexa-600"
-              onClick={() => navigate('/bot-management')}
+              onClick={() => navigate('/bots')}
             >
               <Plus className="mr-2 h-4 w-4" />
               Create WhatsApp Bot
@@ -227,7 +255,7 @@ const ConnectionSetup = ({ userBots, onConnect }: ConnectionSetupProps) => {
           </div>
         </Card>
       )}
-      
+
       <div className="mt-6 md:mt-8 text-center text-xs sm:text-sm text-muted-foreground">
         <p>
           Having trouble connecting? Check our{" "}
@@ -246,17 +274,18 @@ const ConnectionSetup = ({ userBots, onConnect }: ConnectionSetupProps) => {
 };
 
 interface ConnectedDashboardProps {
-  userBots: UserBot[];
+  userBots: BotInfo[];
+  userData: User;
 }
 
-const ConnectedDashboard = ({ userBots }: ConnectedDashboardProps) => {
+const ConnectedDashboard = ({ userBots, userData }: ConnectedDashboardProps) => {
   const navigate = useNavigate();
-  
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h2 className="text-2xl font-bold tracking-tight">Welcome back, John!</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Welcome back, {userData.name}!</h2>
           <p className="text-muted-foreground">
             Here's what's happening with your WhatsApp bot today.
           </p>
@@ -266,56 +295,56 @@ const ConnectedDashboard = ({ userBots }: ConnectedDashboardProps) => {
             <CheckCircle2 className="mr-1 h-3 w-3" />
             Connected
           </Badge>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
-            onClick={() => navigate('/bot-management')}
+            onClick={() => navigate('/bots')}
           >
             <Bot className="mr-1 h-4 w-4" />
             Manage Bots
           </Button>
         </div>
       </div>
-      
+
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="settings">Bot Settings</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <MetricCard 
-              title="Total Messages" 
-              value="2,384" 
+            <MetricCard
+              title="Total Messages"
+              value="2,384"
               change="+12.5%"
               description="vs. last week"
               positive
             />
-            <MetricCard 
-              title="Active Users" 
-              value="1,429" 
+            <MetricCard
+              title="Active Users"
+              value="1,429"
               change="+4.3%"
               description="vs. last week"
               positive
             />
-            <MetricCard 
-              title="Response Rate" 
-              value="93.2%" 
+            <MetricCard
+              title="Response Rate"
+              value="93.2%"
               change="-0.8%"
               description="vs. last week"
               positive={false}
             />
-            <MetricCard 
-              title="Avg. Response Time" 
-              value="28s" 
+            <MetricCard
+              title="Avg. Response Time"
+              value="28s"
               change="-13.2%"
               description="vs. last week"
               positive={true}
             />
           </div>
-          
+
           <div className="grid gap-4 md:grid-cols-2">
             <Card className="col-span-1">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -323,9 +352,9 @@ const ConnectedDashboard = ({ userBots }: ConnectedDashboardProps) => {
                   <CardTitle>Recent Conversations</CardTitle>
                   <CardDescription>Latest chat messages</CardDescription>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className="text-xs text-muted-foreground"
                   onClick={() => navigate('/conversations')}
                 >
@@ -344,9 +373,9 @@ const ConnectedDashboard = ({ userBots }: ConnectedDashboardProps) => {
                       >
                         <div className="flex items-center gap-3">
                           <Avatar>
-                            <AvatarImage 
-                              src={`https://i.pravatar.cc/150?u=${chat.id}`} 
-                              alt={chat.name} 
+                            <AvatarImage
+                              src={`https://i.pravatar.cc/150?u=${chat.id}`}
+                              alt={chat.name}
                             />
                             <AvatarFallback>{chat.name[0]}</AvatarFallback>
                           </Avatar>
@@ -368,8 +397,8 @@ const ConnectedDashboard = ({ userBots }: ConnectedDashboardProps) => {
                                   {chat.unread}
                                 </Badge>
                               ) : (
-                                chat.messages.length > 0 && 
-                                chat.messages[chat.messages.length - 1].sender === "user" && 
+                                chat.messages.length > 0 &&
+                                chat.messages[chat.messages.length - 1].sender === "user" &&
                                 chat.messages[chat.messages.length - 1].status === "read" && (
                                   <div className="flex ml-2">
                                     <Check className="h-3 w-3 text-botnexa-500" />
@@ -386,7 +415,7 @@ const ConnectedDashboard = ({ userBots }: ConnectedDashboardProps) => {
                 </ScrollArea>
               </CardContent>
             </Card>
-            
+
             <Card className="col-span-1">
               <CardHeader>
                 <CardTitle>Upcoming Reminders</CardTitle>
@@ -395,29 +424,29 @@ const ConnectedDashboard = ({ userBots }: ConnectedDashboardProps) => {
               <CardContent>
                 <ScrollArea className="h-72">
                   <div className="space-y-4">
-                    <ReminderItem 
-                      title="Team Meeting" 
-                      date="Today, 2:00 PM" 
+                    <ReminderItem
+                      title="Team Meeting"
+                      date="Today, 2:00 PM"
                       description="Discuss project progress"
                     />
-                    <ReminderItem 
-                      title="Follow up with Client" 
-                      date="Tomorrow, 10:00 AM" 
+                    <ReminderItem
+                      title="Follow up with Client"
+                      date="Tomorrow, 10:00 AM"
                       description="Send proposal updates"
                     />
-                    <ReminderItem 
-                      title="RAG Setup" 
-                      date="Tomorrow, 9:00 AM" 
+                    <ReminderItem
+                      title="RAG Setup"
+                      date="Tomorrow, 9:00 AM"
                       description="Continue with the RAG configuration"
                     />
-                    <ReminderItem 
-                      title="Weekly Report" 
-                      date="Friday, 4:00 PM" 
+                    <ReminderItem
+                      title="Weekly Report"
+                      date="Friday, 4:00 PM"
                       description="Prepare analytics summary"
                     />
-                    <ReminderItem 
-                      title="Team Lunch" 
-                      date="Friday, 12:30 PM" 
+                    <ReminderItem
+                      title="Team Lunch"
+                      date="Friday, 12:30 PM"
                       description="Company cafeteria"
                     />
                   </div>
@@ -425,7 +454,7 @@ const ConnectedDashboard = ({ userBots }: ConnectedDashboardProps) => {
               </CardContent>
             </Card>
           </div>
-          
+
           <div className="grid gap-4 md:grid-cols-2">
             <Card className="hover:bg-secondary/50 transition-colors cursor-pointer" onClick={() => navigate('/features')}>
               <CardContent className="p-4 flex items-center justify-between">
@@ -441,8 +470,8 @@ const ConnectedDashboard = ({ userBots }: ConnectedDashboardProps) => {
                 <ChevronRight className="h-5 w-5 text-muted-foreground" />
               </CardContent>
             </Card>
-            
-            <Card className="hover:bg-secondary/50 transition-colors cursor-pointer" onClick={() => navigate('/bot-management')}>
+
+            <Card className="hover:bg-secondary/50 transition-colors cursor-pointer" onClick={() => navigate('/bots')}>
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="bg-botnexa-100 h-10 w-10 rounded-full flex items-center justify-center dark:bg-botnexa-950/30">
@@ -458,7 +487,7 @@ const ConnectedDashboard = ({ userBots }: ConnectedDashboardProps) => {
             </Card>
           </div>
         </TabsContent>
-        
+
         <TabsContent value="analytics">
           <Card>
             <CardHeader>
@@ -474,7 +503,7 @@ const ConnectedDashboard = ({ userBots }: ConnectedDashboardProps) => {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="settings">
           <Card>
             <CardHeader>
@@ -490,21 +519,21 @@ const ConnectedDashboard = ({ userBots }: ConnectedDashboardProps) => {
                     <label htmlFor="botName" className="text-sm font-medium">Bot Name</label>
                     <Input id="botName" defaultValue="BotNexa Assistant" />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label htmlFor="language" className="text-sm font-medium">Primary Language</label>
                     <Input id="language" defaultValue="English" />
                   </div>
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="space-y-2">
                   <h3 className="text-lg font-medium">AI Configuration</h3>
                   <p className="text-sm text-muted-foreground">
                     Configure how your AI agent interacts with users
                   </p>
-                  
+
                   <div className="pt-2">
                     <div className="space-y-2">
                       <label htmlFor="personality" className="text-sm font-medium">Bot Personality</label>
@@ -512,9 +541,9 @@ const ConnectedDashboard = ({ userBots }: ConnectedDashboardProps) => {
                     </div>
                   </div>
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="pt-2">
                   <Button className="bg-botnexa-500 hover:bg-botnexa-600">
                     Save Changes

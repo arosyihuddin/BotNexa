@@ -19,6 +19,7 @@ export interface UserProfile {
   subscription_tier?: 'free' | 'premium' | 'business';
 }
 
+
 // Get the current user from Supabase
 export const getCurrentUser = async (): Promise<SupabaseUser | null> => {
   const { data } = await supabase.auth.getUser();

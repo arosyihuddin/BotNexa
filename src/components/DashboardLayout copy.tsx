@@ -26,28 +26,22 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-    const saved = localStorage.getItem('sidebar-desktop-state');
-    return saved ? JSON.parse(saved) : true;
-  });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   const { toast } = useToast();
 
-  // Sinkronkan state ke localStorage
   useEffect(() => {
-    localStorage.setItem('sidebar-desktop-state', JSON.stringify(isSidebarOpen));
-  }, [isSidebarOpen]);
-
-  // Handle perubahan dari tab lain
-  useEffect(() => {
-    const handler = (e: StorageEvent) => {
-      if (e.key === 'sidebar-desktop-state') {
-        setIsSidebarOpen(JSON.parse(e.newValue || 'false'));
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsSidebarOpen(true);
+      } else {
+        setIsSidebarOpen(false);
       }
     };
 
-    window.addEventListener('storage', handler);
-    return () => window.removeEventListener('storage', handler);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
+
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -80,13 +74,14 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
         <div className="flex min-h-screen w-full">
           {/* Sidebar */}
           <Sidebar
-            isOpen={isSidebarOpen}
-            setIsOpen={setIsSidebarOpen}
+            // className="h-full flex flex-col overflow-y-auto"
             className={cn(
               "h-screen bg-background border-r border-border",
-              isSidebarOpen ? "w-64" : "md:w-16"
+              isSidebarOpen ? "w-64" : "md:w-[4.5rem]"
             )}
             defaultOpen={!isMobile}
+            // isOpen={isSidebarOpen}
+            // setIsOpen={setIsSidebarOpen}
             header={
               <div className="flex items-center justify-between w-full px-4 h-16 shrink-0">
                 <div className="flex items-center gap-2 min-w-max">
@@ -95,7 +90,7 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
                   </div>
                   <span className={cn(
                     "font-bold text-xl transition-opacity",
-                    isSidebarOpen ? "opacity-100" : "md:opacity-0"
+                    isSidebarOpen ? "opacity-100" : "md:opacity-0 md:hover:opacity-100"
                   )}>
                     BotNexa
                   </span>
@@ -108,48 +103,56 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
                 href: "/dashboard",
                 icon: <Home className="h-5 w-5" />,
                 active: location.pathname === '/dashboard',
+                // showTitle: isSidebarOpen
               },
               {
                 title: "Conversations",
                 href: "/conversations",
                 icon: <MessageSquare className="h-5 w-5" />,
                 active: location.pathname === '/conversations',
+                // showTitle: isSidebarOpen
               },
               {
                 title: "Bots",
                 href: "/bots",
                 icon: <Bot className="h-5 w-5" />,
                 active: location.pathname === '/bots',
+                // showTitle: isSidebarOpen
               },
               {
                 title: "Reminders",
                 href: "/reminders",
                 icon: <Calendar className="h-5 w-5" />,
                 active: location.pathname === '/reminders',
+                // showTitle: isSidebarOpen
               },
               {
                 title: "Contacts",
                 href: "/contacts",
                 icon: <Users className="h-5 w-5" />,
                 active: location.pathname === '/contacts',
+                // showTitle: isSidebarOpen
               },
               {
                 title: "Analytics",
                 href: "/analytics",
                 icon: <BarChart3 className="h-5 w-5" />,
                 active: location.pathname === '/analytics',
+                // showTitle: isSidebarOpen
               },
               {
                 title: "Log Activity",
                 href: "/log-activity",
                 icon: <Activity className="h-5 w-5" />,
                 active: location.pathname === '/log-activity',
+                // showTitle: isSidebarOpen
               },
               {
                 title: "Settings",
                 href: "/settings",
                 icon: <Settings className="h-5 w-5" />,
                 active: location.pathname === '/settings',
+                // showTitle: isSidebarOpen
               },
             ]}
             footer={
@@ -157,13 +160,16 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
                 "flex items-center gap-3 p-4 mt-auto border-t border-border",
                 isSidebarOpen ? "justify-between" : "md:justify-center"
               )}>
-                <Avatar className={cn("shrink-0", !isSidebarOpen && "md:w-8 md:h-8")}>
+                <Avatar className={cn(
+                  "shrink-0",
+                  !isSidebarOpen && "md:w-8 md:h-8"
+                )}>
                   <AvatarImage src="https://github.com/shadcn.png" alt="User" />
                   <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
                 <div className={cn(
                   "flex-1 overflow-hidden transition-opacity",
-                  isSidebarOpen ? "opacity-100" : "md:opacity-0"
+                  isSidebarOpen ? "opacity-100" : "md:opacity-0 md:hover:opacity-100"
                 )}>
                   <p className="text-sm font-medium truncate">John Doe</p>
                   <p className="text-xs text-muted-foreground truncate">john@example.com</p>
@@ -172,7 +178,7 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
                   variant="ghost"
                   size="icon"
                   onClick={handleLogout}
-                  className={cn(!isSidebarOpen && "md:hidden")}
+                  className={cn(!isSidebarOpen && "md:hidden md:hover:block")}
                 >
                   <LogOut className="h-4 w-4" />
                 </Button>
@@ -182,20 +188,31 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
 
           {/* Main Content */}
           <div className={cn(
-            "flex-1 flex flex-col min-h-0 transition-margin duration-300",
-            isSidebarOpen ? "md:ml-64" : "md:ml-16"
+            "flex-1 flex flex-col min-h-0 transition-all duration-300",
+            isSidebarOpen ? "md:ml-64" : "md:ml-[4.5rem]"
           )}>
             <header className={cn(
-              "h-14 border-b border-border flex items-center justify-between px-4 md:px-6 sticky top-0 bg-background/95 backdrop-blur-sm z-20"
+              "h-14 border-b border-border flex items-center justify-between px-7 sticky top-0 bg-background/95 backdrop-blur-sm z-20"
             )}>
               <div className="flex items-center gap-4">
+                {isMobile && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    className="md:hidden"
+                  >
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                )}
+
                 {showBackButton && (
                   <Button variant="ghost" size="icon" onClick={handleBack}>
                     <X className="h-5 w-5" />
                   </Button>
                 )}
 
-                <h1 className="text-xl font-semibold pl-7">{title}</h1>
+                <h1 className="text-xl font-semibold">{title}</h1>
               </div>
 
               <div className="flex items-center gap-3">
@@ -204,7 +221,7 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
                   <Input
                     type="search"
                     placeholder="Search..."
-                    className="w-[200px] pl-8 bg-background"
+                    className="w-[200px] pl-8 bg-background focus-visible:ring-botnexa-500"
                   />
                 </div>
 
@@ -223,13 +240,13 @@ const DashboardLayout = ({ children, title, showBackButton, onBack }: DashboardL
             </header>
 
             <main className="flex-1 overflow-auto p-4 md:p-6 w-full">
-              <div className="max-w-full">
+              <div className="max-w-[calc(100vw-2rem)] md:max-w-[calc(100vw-4.5rem)]">
                 {children}
               </div>
             </main>
           </div>
         </div>
-      </div >
+      </div>
     </PageTransition >
   );
 };

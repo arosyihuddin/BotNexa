@@ -15,7 +15,7 @@ import Features from "./pages/Features";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import LogActivity from "./pages/LogActivity";
-import BotManagement from "./pages/BotManagement";
+import Bots from "./pages/Bots";
 import BotSettings from "./pages/BotSettings";
 import AuthMiddleware from "./components/AuthMiddleware";
 import { ThemeProvider } from "./components/ThemeProvider";
@@ -25,6 +25,7 @@ import { useEffect } from "react";
 import { WhatsAppService } from "./services/whatsapp.service";
 
 import "./App.css";
+import VerifyEmailPage from "./pages/VerifyEmail";
 
 function App() {
   useEffect(() => {
@@ -48,6 +49,11 @@ function App() {
               <Register />
             </AuthMiddleware>
           } />
+          <Route path="/verify-email" element={
+            <AuthMiddleware requireAuth={false}>
+              <VerifyEmailPage />
+            </AuthMiddleware>
+          } />
           <Route path="/forgot-password" element={
             <AuthMiddleware requireAuth={false}>
               <ForgotPassword />
@@ -56,7 +62,7 @@ function App() {
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/features" element={<Features />} />
-          
+
           {/* Protected routes */}
           <Route path="/dashboard" element={
             <AuthMiddleware requireAuth={true}>
@@ -93,9 +99,9 @@ function App() {
               <LogActivity />
             </AuthMiddleware>
           } />
-          <Route path="/bot-management" element={
+          <Route path="/bots" element={
             <AuthMiddleware requireAuth={true}>
-              <BotManagement />
+              <Bots />
             </AuthMiddleware>
           } />
           <Route path="/bot-settings/:botId" element={
@@ -103,11 +109,11 @@ function App() {
               <BotSettings />
             </AuthMiddleware>
           } />
-          
+
           {/* 404 route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-        
+
         {/* Toasters */}
         <Toaster />
         <Sonner position="top-right" closeButton />

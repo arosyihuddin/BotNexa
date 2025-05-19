@@ -8,13 +8,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { 
-  BrainCircuit, MessageSquare, UploadCloud, Database, Upload, 
+import {
+  BrainCircuit, MessageSquare, UploadCloud, Database, Upload,
   File, Trash2, Globe, FileText, X, Plus, ExternalLink, ChevronLeft
 } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { UserService, UserBot } from "@/services/user.service";
+import { UserService } from "@/services/user.service";
 import { useToast } from "@/hooks/use-toast";
+import { BotInfo } from "@/types/app-types";
 
 interface UploadedDocument {
   id: string;
@@ -36,7 +37,7 @@ const BotSettings = () => {
   const { botId } = useParams<{ botId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [bot, setBot] = useState<UserBot | null>(null);
+  const [bot, setBot] = useState<BotInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("personality");
   const [showTextInput, setShowTextInput] = useState(false);
@@ -76,17 +77,17 @@ const BotSettings = () => {
   useEffect(() => {
     const loadBot = async () => {
       if (!botId) {
-        navigate('/bot-management');
+        navigate('/bots');
         return;
       }
-      
+
       setIsLoading(true);
       try {
         // This is a placeholder for fetching the specific bot
         // In a real app, you'd fetch from the API
         const userBots = await UserService.getUserBots();
         const foundBot = userBots.find(b => b.id === botId);
-        
+
         if (foundBot) {
           setBot(foundBot);
         } else {
@@ -95,7 +96,7 @@ const BotSettings = () => {
             description: "Bot not found",
             variant: "destructive",
           });
-          navigate('/bot-management');
+          navigate('/bots');
         }
       } catch (error) {
         console.error("Error loading bot:", error);
@@ -108,7 +109,7 @@ const BotSettings = () => {
         setIsLoading(false);
       }
     };
-    
+
     loadBot();
   }, [botId, navigate, toast]);
 
@@ -122,9 +123,9 @@ const BotSettings = () => {
         size: formatFileSize(file.size),
         date: new Date().toISOString().split('T')[0]
       }));
-      
+
       setDocuments([...documents, ...newDocs]);
-      
+
       // Reset the input
       e.target.value = '';
     }
@@ -139,7 +140,7 @@ const BotSettings = () => {
         content: newDocumentText,
         date: new Date().toISOString().split('T')[0]
       };
-      
+
       setDocuments([...documents, newDoc]);
       setNewDocumentName("");
       setNewDocumentText("");
@@ -155,7 +156,7 @@ const BotSettings = () => {
         type: "website",
         url: newWebsiteUrl
       };
-      
+
       setConnectedSources([...connectedSources, newSource]);
       setNewWebsiteUrl("");
     }
@@ -176,7 +177,7 @@ const BotSettings = () => {
   };
 
   const handleBack = () => {
-    navigate('/bot-management');
+    navigate('/bots');
   };
 
   if (isLoading) {
@@ -203,7 +204,7 @@ const BotSettings = () => {
             </p>
           </div>
         </div>
-        
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid grid-cols-2 md:grid-cols-4 md:w-fit">
             <TabsTrigger value="personality" className="data-[state=active]:bg-botnexa-500 data-[state=active]:text-white dark:data-[state=active]:bg-botnexa-600">Personality</TabsTrigger>
@@ -211,7 +212,7 @@ const BotSettings = () => {
             <TabsTrigger value="behavior" className="data-[state=active]:bg-botnexa-500 data-[state=active]:text-white dark:data-[state=active]:bg-botnexa-600">Behavior</TabsTrigger>
             <TabsTrigger value="advanced" className="data-[state=active]:bg-botnexa-500 data-[state=active]:text-white dark:data-[state=active]:bg-botnexa-600">Advanced</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="personality" className="space-y-4">
             <Card>
               <CardHeader>
@@ -231,7 +232,7 @@ const BotSettings = () => {
                     This name will be displayed to users when the bot introduces itself.
                   </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="personality">Personality Type</Label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -243,12 +244,12 @@ const BotSettings = () => {
                     <Button variant="outline">Custom</Button>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="promptTemplate">Custom Prompt Template</Label>
-                  <Textarea 
-                    id="promptTemplate" 
-                    placeholder="You are a helpful assistant named BotNexa..." 
+                  <Textarea
+                    id="promptTemplate"
+                    placeholder="You are a helpful assistant named BotNexa..."
                     className="min-h-32"
                   />
                   <p className="text-xs text-muted-foreground">
@@ -261,7 +262,7 @@ const BotSettings = () => {
               </CardFooter>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="knowledge" className="space-y-4">
             <Card>
               <CardHeader>
@@ -284,17 +285,17 @@ const BotSettings = () => {
                     Allow your AI to search the web for up-to-date information.
                   </p>
                 </div>
-                
+
                 <Separator />
-                
+
                 {/* Document Upload Section */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <Label className="text-base font-medium">Document Management</Label>
                     <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => setShowTextInput(true)}
                         className="flex items-center gap-1"
                       >
@@ -302,9 +303,9 @@ const BotSettings = () => {
                         <span>Add Text</span>
                       </Button>
                       <label htmlFor="file-upload">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           className="flex items-center gap-1"
                           asChild
                         >
@@ -323,7 +324,7 @@ const BotSettings = () => {
                       </label>
                     </div>
                   </div>
-                  
+
                   {showTextInput && (
                     <Card className="p-4 bg-muted/30 border-dashed">
                       <div className="flex justify-between items-center mb-3">
@@ -335,26 +336,26 @@ const BotSettings = () => {
                       <div className="space-y-3">
                         <div className="space-y-1">
                           <Label htmlFor="docName">Document Name</Label>
-                          <Input 
-                            id="docName" 
-                            value={newDocumentName} 
+                          <Input
+                            id="docName"
+                            value={newDocumentName}
                             onChange={(e) => setNewDocumentName(e.target.value)}
                             placeholder="E.g., Product Instructions"
                           />
                         </div>
                         <div className="space-y-1">
                           <Label htmlFor="docContent">Content</Label>
-                          <Textarea 
-                            id="docContent" 
-                            value={newDocumentText} 
+                          <Textarea
+                            id="docContent"
+                            value={newDocumentText}
                             onChange={(e) => setNewDocumentText(e.target.value)}
                             placeholder="Enter document content here..."
                             className="min-h-[150px]"
                           />
                         </div>
                         <div className="flex justify-end">
-                          <Button 
-                            variant="default" 
+                          <Button
+                            variant="default"
                             className="bg-botnexa-500 hover:bg-botnexa-600 text-white"
                             onClick={handleAddTextDocument}
                           >
@@ -364,11 +365,11 @@ const BotSettings = () => {
                       </div>
                     </Card>
                   )}
-                  
+
                   {/* Document List */}
                   <div className="space-y-2 mt-4">
                     <h4 className="text-sm font-medium mb-2">Uploaded Documents</h4>
-                    
+
                     {documents.length === 0 ? (
                       <div className="border border-dashed rounded-lg p-6 flex flex-col items-center justify-center space-y-2 bg-muted/30">
                         <div className="rounded-full bg-muted p-2">
@@ -408,9 +409,9 @@ const BotSettings = () => {
                     )}
                   </div>
                 </div>
-                
+
                 <Separator />
-                
+
                 {/* Connected Sources Section */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -422,9 +423,9 @@ const BotSettings = () => {
                         onChange={(e) => setNewWebsiteUrl(e.target.value)}
                         className="w-48 h-8 text-sm"
                       />
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={handleAddWebsite}
                         className="flex items-center gap-1 h-8"
                       >
@@ -433,7 +434,7 @@ const BotSettings = () => {
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     {connectedSources.map((source) => (
                       <div key={source.id} className="flex items-center justify-between bg-muted/30 p-3 rounded-lg">
@@ -457,9 +458,9 @@ const BotSettings = () => {
                             )}
                           </div>
                         </div>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => handleRemoveSource(source.id)}
                           className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
@@ -475,7 +476,7 @@ const BotSettings = () => {
               </CardFooter>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="behavior" className="space-y-4">
             <Card>
               <CardHeader>
@@ -496,23 +497,23 @@ const BotSettings = () => {
                     <Button variant="outline">Detailed</Button>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="greetingMessage">Greeting Message</Label>
-                  <Textarea 
-                    id="greetingMessage" 
-                    placeholder="Hello! I'm your BotNexa Assistant. How can I help you today?" 
+                  <Textarea
+                    id="greetingMessage"
+                    placeholder="Hello! I'm your BotNexa Assistant. How can I help you today?"
                     className="min-h-20"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="useEmojis">Use Emojis</Label>
                     <Switch id="useEmojis" />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="citeSources">Cite Sources</Label>
@@ -528,7 +529,7 @@ const BotSettings = () => {
               </CardFooter>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="advanced" className="space-y-4">
             <Card>
               <CardHeader>
@@ -548,17 +549,17 @@ const BotSettings = () => {
                     <Button variant="outline" className="border-botnexa-200 bg-botnexa-50 dark:border-botnexa-700 dark:bg-botnexa-950/50 dark:text-botnexa-300">Advanced</Button>
                   </div>
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="temperature">Temperature</Label>
                   <div className="flex items-center gap-2">
-                    <Input 
-                      id="temperature" 
-                      type="range" 
-                      min="0" 
-                      max="100" 
+                    <Input
+                      id="temperature"
+                      type="range"
+                      min="0"
+                      max="100"
                       defaultValue="70"
                       className="w-full"
                     />
@@ -568,7 +569,7 @@ const BotSettings = () => {
                     Controls randomness: Lower values for more focused responses, higher for more creative ones.
                   </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="maxTokens">Max Response Length</Label>
                   <Input id="maxTokens" type="number" defaultValue="2048" />
@@ -576,7 +577,7 @@ const BotSettings = () => {
                     Maximum length of responses in tokens (approximately 4 characters per token).
                   </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="debugging">Enable Debugging</Label>

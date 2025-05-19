@@ -15,13 +15,13 @@ const AuthMiddleware = ({ children, requireAuth = true }: AuthMiddlewareProps) =
   const location = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  
-  const publicPaths = ['/login', '/register', '/forgot-password', '/terms-of-service', '/privacy-policy'];
+
+  const publicPaths = ['/login', '/register', '/forgot-password', '/terms-of-service', '/privacy-policy', '/verify-email'];
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const user = session?.user;
-      
+
       if (!user && requireAuth) {
         toast({
           title: "Authentication required",
@@ -33,7 +33,7 @@ const AuthMiddleware = ({ children, requireAuth = true }: AuthMiddlewareProps) =
         // Redirect already logged in users away from auth pages
         navigate("/dashboard");
       }
-      
+
       setLoading(false);
     });
 

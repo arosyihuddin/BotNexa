@@ -1,9 +1,7 @@
 import * as React from "react";
-import { cn } from "@/lib/utils";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { X, ChevronLeft } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { Button } from "./button";
+import { ChevronLeft, Menu, User, Settings, LogOut } from "lucide-react";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   defaultOpen?: boolean;
@@ -25,166 +23,184 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
-  (
-    {
-      className,
-      defaultOpen = true,
-      header,
-      isOpen,
-      setIsOpen,
-      items = [],
-      footer,
-      setActivePath,
-      ...props
-    },
-    ref
-  ) => {
-    const [open, setOpen] = React.useState(defaultOpen);
-    const [mobileOpen, setMobileOpen] = React.useState(false);
-    const isMobile = useIsMobile();
+  ({ className, defaultOpen = true, header, items = [], ...props }, ref) => {
+    const [isMobileOpen, setIsMobileOpen] = React.useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
     const sidebarRef = React.useRef<HTMLDivElement>(null);
+    const dropdownRef = React.useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
     const location = useLocation();
 
-    const isControlled = isOpen !== undefined && setIsOpen !== undefined;
-    const showOpen = isControlled ? isOpen : open;
-    const showMobileOpen = isControlled ? isOpen : mobileOpen;
-
-    // Handle hover untuk desktop
-    const handleMouseEnter = () => {
-      if (!isMobile && isControlled && !showOpen) {
-        setIsOpen(true);
-      }
-    };
-
-    const handleMouseLeave = () => {
-      if (!isMobile && isControlled && showOpen) {
-        setIsOpen(false);
-      }
-    };
-
-    // Handle click outside to close mobile sidebar
     React.useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-        if (isMobile && showMobileOpen && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
-          if (isControlled) {
-            setIsOpen(false);
-          } else {
-            setMobileOpen(false);
-          }
+      const handleResize = () => {
+        if (window.innerWidth >= 768) setIsMobileOpen(false);
+      };
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    React.useEffect(() => {
+      const handleClickOutside = (e: MouseEvent) => {
+        // Handle mobile sidebar close
+        if (window.innerWidth < 768 &&
+          sidebarRef.current &&
+          !sidebarRef.current.contains(e.target as Node)) {
+          setIsMobileOpen(false);
+        }
+
+        // Handle profile dropdown close
+        if (dropdownRef.current &&
+          !dropdownRef.current.contains(e.target as Node)) {
+          setIsDropdownOpen(false);
         }
       };
 
       document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, [isMobile, showMobileOpen, isControlled, setIsOpen]);
-
-    const toggleSidebar = () => {
-      if (isControlled) {
-        setIsOpen(!showOpen);
-      } else {
-        if (isMobile) {
-          setMobileOpen(!showMobileOpen);
-        } else {
-          setOpen(!showOpen);
-        }
-      }
-    };
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     return (
       <>
+        {/* Mobile Toggle Button (Only shown when sidebar is closed) */}
+        {!isMobileOpen && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="fixed z-40 left-2 top-2 md:hidden h-9 w-9"
+            onClick={() => setIsMobileOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle Sidebar</span>
+          </Button>
+        )}
+
+        {/* Sidebar Container */}
         <div
           ref={sidebarRef}
-          className={cn(
-            "fixed inset-y-0 left-0 z-30 flex h-screen flex-col border-r bg-background",
-            "w-[280px] md:w-64 transition-[transform,width] duration-300 ease-in-out",
-            isMobile
-              ? showMobileOpen
-                ? "translate-x-0"
-                : "-translate-x-full w-0"
-              : showOpen
-                ? "w-64"
-                : "md:w-16",
-            className
-          )}
+          className={`
+            fixed inset-y-0 left-0 z-30 flex flex-col
+            bg-background border-r
+            transition-transform duration-300 ease-in-out
+            md:translate-x-0 md:transition-[width] 
+            ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
+            ${props.isOpen ? 'md:w-64' : 'md:w-16'}
+          `}
           {...props}
         >
-          <div className="flex h-14 items-center border-b px-4">
-            <div className="flex-1">
-              {showOpen && (header || <div className="font-medium">Sidebar Header</div>)}
+          {/* Header Section */}
+          <div className="flex h-14 items-center border-b px-2">
+            <div className="flex-1 overflow-hidden">
+              {props.isOpen && (header || (
+                <div className="font-medium px-2 truncate">App Logo</div>
+              ))}
             </div>
+
+            {/* Desktop Toggle (Hidden in mobile) */}
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="h-8 w-8"
-              onClick={toggleSidebar}
+              className="h-9 w-9 hidden md:inline-flex"
+              onClick={() => props.setIsOpen?.(!props.isOpen)}
             >
-              {isMobile ? (
-                <X className="h-4 w-4" />
-              ) : showOpen ? (
-                <ChevronLeft className="h-4 w-4" />
-              ) : null}
+              {props.isOpen ? (
+                <ChevronLeft className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
               <span className="sr-only">
-                {showOpen ? "Close Menu" : "Open Menu"}
+                {props.isOpen ? "Collapse" : "Expand"}
               </span>
             </Button>
           </div>
 
-          <nav className="flex-1 overflow-auto p-2">
+          {/* Navigation Items with proper links */}
+          <nav className="flex-1 overflow-y-auto p-2">
             <ul className="grid gap-1">
-              {items.map((item, index) => {
-                const isActive = item.href
-                  ? location.pathname === item.href
-                  : item.active;
-
-                return (
-                  <li key={index}>
-                    {item.customContent || (
-                      <Button
-                        variant={isActive ? "secondary" : "ghost"}
-                        className={cn(
-                          "w-full",
-                          !showOpen ? "justify-center px-2" : "justify-start",
-                          isActive ? "bg-accent" : "",
-                          item.disabled && "pointer-events-none opacity-50"
-                        )}
-                        onClick={() => {
-                          if (item.onClick) {
-                            item.onClick();
-                          } else if (item.href && !item.disabled) {
-                            navigate(item.href);
-                            if (setActivePath) setActivePath(item.href);
-                            if (isMobile && isControlled) {
-                              setIsOpen(false);
-                            } else if (isMobile) {
-                              setMobileOpen(false);
-                            }
-                          }
-                        }}
-                      >
-                        {item.icon}
-                        {showOpen && (
-                          <>
-                            <span className="ml-2">{item.title}</span>
-                            {item.label && (
-                              <span className="ml-auto">{item.label}</span>
-                            )}
-                          </>
-                        )}
-                      </Button>
-                    )}
-                  </li>
-                );
-              })}
+              {items.map((item, index) => (
+                <li key={index}>
+                  <Link
+                    to={item.href || "#"}
+                    className="block"
+                    onClick={(e) => {
+                      if (item.onClick) {
+                        e.preventDefault();
+                        item.onClick();
+                      }
+                      if (window.innerWidth < 768) setIsMobileOpen(false);
+                    }}
+                  >
+                    <Button
+                      variant={location.pathname === item.href ? "secondary" : "ghost"}
+                      className={`w-full justify-start h-10 ${!props.isOpen ? "px-2 justify-center" : "px-3"
+                        }`}
+                    >
+                      {item.icon}
+                      {(props.isOpen || window.innerWidth < 768) && <span className="ml-2 truncate">{item.title}</span>}
+                    </Button>
+                  </Link>
+                </li>
+              ))}
             </ul>
           </nav>
 
-          {footer && <div className="border-t p-4">{footer}</div>}
+          {/* Profile Section with fixed dropdown positioning */}
+          <div className="border-t p-2 relative" ref={dropdownRef}>
+            <Button
+              variant="ghost"
+              className={`w-full h-10 ${props.isOpen ? "justify-start px-3" : "justify-center px-2"
+                }`}
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
+              <User className="h-5 w-5" />
+              {props.isOpen && <span className="ml-2 truncate">User Profile</span>}
+            </Button>
+
+            {isDropdownOpen && (
+              <div
+                className={`
+                  absolute
+                  ${props.isOpen ? 'left-[15.5rem]' : 'left-[3.5rem]'}
+                  bottom-2
+                  mt-2 bg-background border rounded-lg shadow-lg z-50
+                  w-[calc(100%-1rem)] md:w-48
+                  ${!props.isOpen ? '-translate-x-full left-16 top-16' : ''}
+                `}
+              >
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start h-10 px-3"
+                  onClick={() => console.log("Settings clicked")}
+                >
+                  <Settings className="h-5 w-5 mr-2" />
+                  <span>Settings</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start h-10 px-3 text-red-600 hover:bg-red-50"
+                  onClick={() => console.log("Logout clicked")}
+                >
+                  <LogOut className="h-5 w-5 mr-2" />
+                  <span>Logout</span>
+                </Button>
+              </div>
+            )}
+
+            {/* Handle click outside dropdown */}
+            {isDropdownOpen && (
+              <div
+                className="fixed inset-0 z-40 bg-transparent"
+                onClick={() => setIsDropdownOpen(false)}
+              />
+            )}
+          </div>
         </div>
-        {isMobile && showMobileOpen && (
-          <div className="fixed inset-0 z-20 bg-black/50" />
+
+        {/* Mobile Overlay */}
+        {isMobileOpen && (
+          <div
+            className="fixed inset-0 z-20 bg-black/50 md:hidden"
+            onClick={() => setIsMobileOpen(false)}
+          />
         )}
       </>
     );

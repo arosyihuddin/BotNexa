@@ -32,16 +32,17 @@ export interface Reminder {
   completed: boolean;
 }
 
-// Bot type
 export interface BotInfo {
-  id: string;
+  id: number;
   name: string;
+  number: string;
   description: string;
-  status: 'active' | 'inactive';
-  createdAt: string;
-  lastUsed: string;
-  type: 'support' | 'sales' | 'scheduler' | 'faq' | 'order';
-  phoneNumber: string;
+  isConnected: boolean;
+  created_at: string;
+  deleted_at: string;
+  updated_at: string;
+  settings: JSON;
+  userId: string;
 }
 
 // Activity Log type

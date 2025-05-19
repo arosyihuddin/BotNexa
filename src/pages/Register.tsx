@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { EyeIcon, ArrowLeft, EyeOffIcon, LockIcon, MailIcon, UserIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PageTransition } from "@/lib/animations";
-import { UserService } from "@/services/user.service";
+import { supabase } from "@/lib/supabase";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -23,7 +23,7 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!acceptTerms) {
       toast({
         title: "Terms not accepted",
@@ -32,24 +32,29 @@ const Register = () => {
       });
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
-      // Register with Supabase and API
-      await UserService.registerUser({
-        email,
-        password,
-        fullName: name
-      });
-      
-      // Redirect to dashboard on successful registration
-      navigate("/dashboard");
-      
-      toast({
-        title: "Account created",
-        description: "Your account has been created successfully.",
-      });
+
+      const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { display_name: name } } });
+      console.log(data);
+
+      if (error) {
+        toast({
+          title: "Registration failed",
+          description: `${error.message}`,
+          variant: "destructive",
+        })
+      } else {
+        localStorage.setItem("temp_email", email);
+        toast({
+          title: "Account created",
+          description: "Check your email to verify your account.",
+        });
+        navigate("/verify-email");
+      }
+
     } catch (error) {
       console.error("Registration error:", error);
       toast({
@@ -71,7 +76,7 @@ const Register = () => {
             Back to home
           </Link>
         </header>
-        
+
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="w-full max-w-md mx-auto">
             <div className="text-center mb-8">
@@ -80,7 +85,7 @@ const Register = () => {
                 Sign up to get started with BotNexa
               </p>
             </div>
-            
+
             <Card className="p-6 bg-white/70 dark:bg-card/50 backdrop-blur-sm border-border/50 animate-scale-in">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
@@ -99,7 +104,7 @@ const Register = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <div className="relative">
@@ -116,7 +121,7 @@ const Register = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
                   <div className="relative">
@@ -141,10 +146,10 @@ const Register = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start space-x-2 py-2">
-                  <Checkbox 
-                    id="terms" 
+                  <Checkbox
+                    id="terms"
                     checked={acceptTerms}
                     onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
                   />
@@ -154,15 +159,15 @@ const Register = () => {
                       className="text-sm text-muted-foreground font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
                       I agree to the{" "}
-                      <Link 
-                        to="/terms-of-service" 
+                      <Link
+                        to="/terms-of-service"
                         className="text-botnexa-600 dark:text-botnexa-400 hover:text-botnexa-700 dark:hover:text-botnexa-300 transition-colors"
                       >
                         Terms of Service
                       </Link>{" "}
                       and{" "}
-                      <Link 
-                        to="/privacy-policy" 
+                      <Link
+                        to="/privacy-policy"
                         className="text-botnexa-600 dark:text-botnexa-400 hover:text-botnexa-700 dark:hover:text-botnexa-300 transition-colors"
                       >
                         Privacy Policy
@@ -170,7 +175,7 @@ const Register = () => {
                     </label>
                   </div>
                 </div>
-                
+
                 <Button
                   type="submit"
                   className="w-full bg-botnexa-500 hover:bg-botnexa-600"
@@ -179,7 +184,7 @@ const Register = () => {
                   {isLoading ? "Creating account..." : "Create account"}
                 </Button>
               </form>
-              
+
               <div className="mt-6 text-center text-sm">
                 <span className="text-muted-foreground">Already have an account?</span>{" "}
                 <Link

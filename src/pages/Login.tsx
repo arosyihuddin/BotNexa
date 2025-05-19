@@ -9,7 +9,6 @@ import { EyeIcon, ArrowLeft, EyeOffIcon, LockIcon, MailIcon } from "lucide-react
 import { useToast } from "@/hooks/use-toast";
 import { PageTransition } from "@/lib/animations";
 import { supabase } from "@/lib/supabase";
-import { UserService } from "@/services/user.service";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -25,16 +24,24 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Login with Supabase and API
-      await UserService.loginUser(email, password);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
 
-      // Redirect to dashboard on successful login
-      navigate("/dashboard");
-
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in.",
-      });
+      if (error) {
+        toast({
+          title: "Login failed",
+          description: `${error.message}`,
+          variant: "destructive",
+        })
+      }
+      else {
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully logged in.",
+        });
+      }
     } catch (error) {
       toast({
         title: "Login failed",
@@ -50,7 +57,6 @@ const Login = () => {
     setIsGoogleLoading(true);
 
     try {
-      // Sign in with Google popup
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -62,7 +68,6 @@ const Login = () => {
 
       // The redirect will happen automatically
       const { data: { user } } = await supabase.auth.getUser()
-      console.log("user", user);
 
       toast({
         title: "Redirecting to Google",
